@@ -28,10 +28,10 @@ void Light::setMainLightValues(int program, const char* intensity, const char* d
 {
 
 	int intensityLoc = glGetUniformLocation(program, intensity);
-	int aColorLoc = glGetUniformLocation(program, direction);
+	int directionLoc = glGetUniformLocation(program, direction);
 
 	glUniform1f(intensityLoc, mainLightIntensity);
-	glUniform3f(aColorLoc, mainLightDir.x, mainLightDir.y, mainLightDir.z);
+	glUniform3f(directionLoc, mainLightDir.x, mainLightDir.y, mainLightDir.z);
 }
 
 

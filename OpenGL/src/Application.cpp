@@ -146,12 +146,51 @@ static float Angle() {
     return curVal;
 }
 
+void setNormals(float* verticeData,int stride,int indiceCount,int normalOffset,int verticeCount,unsigned int* indices) {
+
+    for (int i = 0; i < indiceCount * verticeCount; i+=3) {
+        int verticeStart = indices[i] * stride;
+        glm::vec3 verticeFirst = glm::vec3(verticeData[verticeStart], verticeData[verticeStart + 1], verticeData[verticeStart + 2]);
+
+        verticeStart = indices[i + 1] * stride;
+        glm::vec3 verticeSecond = glm::vec3(verticeData[verticeStart], verticeData[verticeStart + 1], verticeData[verticeStart + 2]);
+
+        verticeStart = indices[i + 2] * stride;
+        glm::vec3 verticeThird = glm::vec3(verticeData[verticeStart], verticeData[verticeStart + 1], verticeData[verticeStart + 2]);
+
+        glm::vec3 verticeDiffOne = verticeSecond - verticeFirst;
+        glm::vec3 verticeDiffTwo = verticeThird - verticeFirst;
+
+        glm::vec3 normal = glm::cross(verticeDiffOne,verticeDiffTwo);
+        normal = glm::normalize(normal);
+
+        for (int j = i; j < i + 3; j++) {
+            int normalStart = indices[j] * stride + normalOffset;
+            verticeData[normalStart] += normal.x;
+            verticeData[normalStart + 1] += normal.y;
+            verticeData[normalStart + 2] += normal.z;
+        }
+    }
+    for (int i = 0; i < indiceCount; i++) {
+        int nOffset = i * stride + normalOffset;
+
+        glm::vec3 normal(verticeData[nOffset], verticeData[nOffset + 1], verticeData[nOffset + 2]);
+
+        normal = glm::normalize(normal);
+
+        verticeData[nOffset] = normal.x;
+        verticeData[nOffset + 1] = normal.y;
+        verticeData[nOffset + 2] = normal.z;
+
+    }
+
+}
 
 int main(void)
 {
     Window* window = new Window();
 
-    //Light light = Light(0.2f,glm::vec3(1.0f,1.0f,1.0f));
+    Light light = Light(1.0f,0.2f,glm::vec3(1.0f,1.0f,1.0f),glm::vec3(0.0f,1.0f,0.0f));
 
     if (window->createWindow(640, 480) == 1)
         return 1;
@@ -161,7 +200,6 @@ int main(void)
     }
 
     glViewport(0,0, window->fbWidth,window->fbHeight);
-
 
     /*const char* vShaderData = "#version 330 core\n"
         "layout (location = 0) in vec3 position;\n"
@@ -188,21 +226,37 @@ int main(void)
 
     glEnable(GL_DEPTH_TEST);
 
+    /*float vertices[] =
+    {
+        0.0f, 1.0f, 0.0f,   0.5f,1.0f,   0.0f,1.0f,0.0f,//0
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,  -1.0f,0.0f,0.0f,//1
+        1.0f, -1.0f, 0.0f,  1.0f, 0.0f,  1.0f,0.0f,0.0f,//2
+        0.0f,-1.0f,1.0f,    0.5f,0.0f,   0.0f,0.0f,1.0f//3
+    };*/
+
     float vertices[] =
     {
-        0.0f, 1.0f, 0.0f,   0.5f,1.0f,  
-        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 
-        1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
-        0.0f,-1.0f,1.0f,    0.5f,0.0f 
+        0.0f, 1.0f, 0.0f,   0.5f,1.0f,   0.0f,0.0f,0.0f,//0
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,  0.0f,0.0f,0.0f,//1
+        1.0f, -1.0f, 0.0f,  1.0f, 0.0f,  0.0f,0.0f,0.0f,//2
+        0.0f,-1.0f,1.0f,    0.5f,0.0f,   0.0f,0.0f,0.0f//3
     };
 
     unsigned int indices[] =
     {
-        0,1,2,
-        0,1,3,
-        0,2,3,
-        1,2,3
+        0,1,2,   // front
+        0,3,1,   // left  (swapped 1,3)
+        0,2,3,   // right
+        1,3,2    // bottom (swapped 2,3)
     };
+
+    setNormals(vertices, 8, 4, 5, 3, indices);
+
+    for (int i = 0; i < 12; i+=3) {
+        printf("%f ** ", vertices[i + 5]);
+        printf("%f ** ", vertices[i + 6]);
+        printf("%f\n", vertices[i + 7]);
+    }
 
     VertexBuffer vb(vertices, sizeof(vertices));
     vb.CreateElementBufferObject(indices, sizeof(indices));
@@ -217,11 +271,12 @@ int main(void)
     int view_loc = glGetUniformLocation(shaderProgram, "view");
     int projection_loc = glGetUniformLocation(shaderProgram, "projection");
 
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),NULL);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),NULL);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     glm::mat4 projection(1.0f);
 
@@ -262,12 +317,13 @@ int main(void)
         glUniformMatrix4fv(view_loc, 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
         glUniformMatrix4fv(projection_loc,1, GL_FALSE, glm::value_ptr(projection));
 
-        //light.setAmbientValues(shaderProgram, "lightData.aIntensity", "lightData.aColor");
+        light.setAmbientValues(shaderProgram, "lightData.aIntensity", "lightData.aColor");
+        light.setMainLightValues(shaderProgram, "lightData.mainLightIntensity", "lightData.mainLightDir");
 
         vb.BindVAO();
 
         //glDrawArrays(GL_TRIANGLES,0,3);
-        glDrawElements(GL_TRIANGLES, 20, GL_UNSIGNED_INT,0);
+        glDrawElements(GL_TRIANGLES, 32, GL_UNSIGNED_INT,0);
 
         vb.UnBindVAO();
    
