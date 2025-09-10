@@ -6,6 +6,10 @@ Light::Light() : aLightIntensity(0), mainLightIntensity(0)
 	mainLightDir = glm::vec3(0, 0, 0);
 }
 
+Light::~Light()
+{
+}
+
 Light::Light(float mainLightIntensity,float aLightIntensity, glm::vec3 ambientColor,glm::vec3 mainLightDir)
 {
 	this->aLightIntensity = aLightIntensity;

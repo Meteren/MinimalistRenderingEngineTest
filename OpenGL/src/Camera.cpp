@@ -66,6 +66,11 @@ glm::mat4 Camera::getViewMatrix()
 	return view;
 }
 
+glm::vec3 Camera::getCameraPos()
+{
+	return cameraPos;
+}
+
 void Camera::setCameraRotation(Window* window,float changeX, float changeY)
 {
 	this->changeX = changeX;

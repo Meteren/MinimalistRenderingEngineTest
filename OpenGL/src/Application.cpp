@@ -19,6 +19,8 @@
 
 #include "Light.h"
 
+#include "Material.h"
+
 static const char* ReadShader(const char* path) {
 
     std::string line;
@@ -130,8 +132,8 @@ static float ColorVal() {
 static glm::mat4x4 ApplyTransform(float pVal,float rVal) {
     glm::mat4x4 model(1.0f);
     model = glm::translate(model, glm::vec3(pVal, 0, -2.5f));
-    model = glm::rotate(model, rVal * degreeToRad, glm::vec3(0, 1, 0));
-    model = glm::scale(model, glm::vec3(0.4f, 0.4f, 1.0f));
+    model = glm::rotate(model, rVal* degreeToRad, glm::vec3(0, 0, 1));
+    //model = glm::scale(model, glm::vec3(0.4f, 0.4f, 1.0f));
     return model;
 }
 
@@ -190,9 +192,11 @@ int main(void)
 {
     Window* window = new Window();
 
-    Light light = Light(1.0f,0.2f,glm::vec3(1.0f,1.0f,1.0f),glm::vec3(0.0f,1.0f,0.0f));
+    Light light = Light(1.0f,0.2f,glm::vec3(1.0f,1.0f,1.0f),glm::vec3(2.0f,1.0f,-2.0f));
 
-    if (window->createWindow(640, 480) == 1)
+    Material material = Material(1, 32);
+
+    if (window->createWindow(1366, 780) == 1)
         return 1;
 
     if (glewInit() != GLEW_OK) {
@@ -237,8 +241,8 @@ int main(void)
     float vertices[] =
     {
         0.0f, 1.0f, 0.0f,   0.5f,1.0f,   0.0f,0.0f,0.0f,//0
-        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,  0.0f,0.0f,0.0f,//1
-        1.0f, -1.0f, 0.0f,  1.0f, 0.0f,  0.0f,0.0f,0.0f,//2
+        -1.0f, -1.0f, -0.6f, 0.0f, 0.0f,  0.0f,0.0f,0.0f,//1
+        1.0f, -1.0f, -0.6f,  1.0f, 0.0f,  0.0f,0.0f,0.0f,//2
         0.0f,-1.0f,1.0f,    0.5f,0.0f,   0.0f,0.0f,0.0f//3
     };
 
@@ -270,6 +274,7 @@ int main(void)
     int model_loc = glGetUniformLocation(shaderProgram, "model");
     int view_loc = glGetUniformLocation(shaderProgram, "view");
     int projection_loc = glGetUniformLocation(shaderProgram, "projection");
+    int camPos_loc = glGetUniformLocation(shaderProgram, "camPos");
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),NULL);
     glEnableVertexAttribArray(0);
@@ -312,6 +317,8 @@ int main(void)
         glUniformMatrix4fv(model_loc,1, GL_FALSE, glm::value_ptr(ApplyTransform(0,0)));
 
         camera.TransformCamera(window->getKeys(),deltaTime);
+        glUniform3f(camPos_loc, camera.getCameraPos().x, camera.getCameraPos().y, camera.getCameraPos().z);
+
         camera.setCameraRotation(window,window->getChangeX(), window->getChangeY());
         camera.createViewMatrix();
         glUniformMatrix4fv(view_loc, 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
@@ -319,6 +326,7 @@ int main(void)
 
         light.setAmbientValues(shaderProgram, "lightData.aIntensity", "lightData.aColor");
         light.setMainLightValues(shaderProgram, "lightData.mainLightIntensity", "lightData.mainLightDir");
+        material.setMaterial(shaderProgram, "material.metallic", "material.smoothness");
 
         vb.BindVAO();
 

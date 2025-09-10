@@ -15,6 +15,7 @@ private:
 
 public:
 	Light();
+	~Light();
 
 	Light(float mainLightIntensity, float aLightIntensity, glm::vec3 ambientColor, glm::vec3 mainLightDir);
 
