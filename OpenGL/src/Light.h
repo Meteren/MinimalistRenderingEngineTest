@@ -4,20 +4,21 @@
 #include <GLM/gtc/matrix_transform.hpp>
 #include <GL/glew.h>
 #include <iostream>
+#include "Shader.h"
 
 class Light
 {
-private:
-	float mainLightIntensity;
+protected:
+	float directionalLightIntensity;
 	float aLightIntensity;
 	glm::vec3 ambientColor;
-	glm::vec3 mainLightDir;
 
 public:
 	Light();
-	~Light();
+	
+	Light(float mainLightIntensity, float aLightIntensity, glm::vec3 ambientColor);
 
-	Light(float mainLightIntensity, float aLightIntensity, glm::vec3 ambientColor, glm::vec3 mainLightDir);
+	virtual void useLight(Shader* shader);
 
 	void setAmbientValues(int program, const char* aIntensity, const char* aColor);
 	void setMainLightValues(int program, const char* intensity, const char* direction);
@@ -26,6 +27,7 @@ public:
 
 	float getAmbientLightIntensity();
 
+	~Light();
 	
 };
 

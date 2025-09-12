@@ -17,107 +17,12 @@
 
 #include "Texture.h"
 
-#include "Light.h"
+#include "DirectionalLight.h"
 
 #include "Material.h"
 
-static const char* ReadShader(const char* path) {
+#include "Shader.h"
 
-    std::string line;
-    
-    std::ifstream readFile(path);
-
-    if (!readFile.is_open()) {
-        return nullptr;
-    }
-
-    std::string content;
-
-    while (!readFile.eof()) {
-        getline(readFile, line);
-        content.append(line + "\n");
-    }
-
-    readFile.close();
-    char* contentConverted = new char[content.size() + 1];
-
-    std::copy(content.begin(), content.end(), contentConverted);
-
-    contentConverted[content.size()] = '\0';
- 
-    printf("%s", contentConverted);
-
-    return contentConverted;
-
-}
-
-static void ReadShader(std::string* content, const char* path) {
-    std::string line;
-
-    std::ifstream readFile(path);
-
-    while (getline(readFile, line)) {
-        content->append(line + "\n");
-    }
-
-    readFile.close();
-
-}
-
-static unsigned int CompileShader(unsigned int type, const char* data) {
-
-    unsigned int s_ID;
-
-    int success;
-    char infoLog[512];
-
-    s_ID = glCreateShader(type);
-    glShaderSource(s_ID, 1, &data, NULL);
-    glCompileShader(s_ID);
-    
-    glGetShaderiv(s_ID, GL_COMPILE_STATUS, &success);
-
-    if (!success) {
-        glGetShaderInfoLog(s_ID, 512, NULL, infoLog);
-
-        std::cout << "Error while compiling shader:\n" << infoLog << std::endl;
-        return 0;
-    }
-    return s_ID;
-}
-
-
-static unsigned int CreateProgram(const char* vShaderData, const char* fShaderData){
-
-    unsigned int p_ID;
-    
-    int success;
-    char infoLog[512];
-    p_ID = glCreateProgram();
-
-    unsigned int v_shader = CompileShader(GL_VERTEX_SHADER, vShaderData);
-    unsigned int f_shader = CompileShader(GL_FRAGMENT_SHADER, fShaderData);
-
-    glAttachShader(p_ID, v_shader);
-    glAttachShader(p_ID, f_shader);
-
-    glLinkProgram(p_ID);
-
-    glDeleteShader(v_shader);
-    glDeleteShader(f_shader);
-
-    glGetProgramiv(p_ID, GL_LINK_STATUS, &success);
-
-    if (!success) {
-        glGetProgramInfoLog(p_ID, 512, NULL, infoLog);
-
-        std::cout << "Error occured while linking program.\n" << std::endl;
-
-        return 0;
-    }
-
-    return p_ID;
-}
 
 float degreeToRad = 3.1415f / 180;
 
@@ -192,7 +97,9 @@ int main(void)
 {
     Window* window = new Window();
 
-    Light light = Light(1.0f,0.2f,glm::vec3(1.0f,1.0f,1.0f),glm::vec3(2.0f,1.0f,-2.0f));
+    Shader shader = Shader();
+
+    DirectionalLight directionalLight = DirectionalLight(1.0f,0.2f,glm::vec3(1,1,1),glm::vec3(2,-1,-2));
 
     Material material = Material(1, 32);
 
@@ -216,7 +123,7 @@ int main(void)
         "vertex_color = vec4(clamp(position,0.0f,1.0f),1);\n"
         "}";*/
     
-    const char* vShaderData = ReadShader("C:/Users/Meate/source/repos/OpenGL/OpenGL/src/vertex.shader");
+    const char* vShaderData = Shader::readShader("C:/Users/Meate/source/repos/OpenGL/OpenGL/src/vertex.shader");
 
     /*const char* fShaderData = "#version 330 core\n"
         "out vec4 color;\n"
@@ -226,7 +133,7 @@ int main(void)
         "color = vertex_color;\n"
         "}";*/
 
-    const char* fShaderData = ReadShader("C:/Users/Meate/source/repos/OpenGL/OpenGL/src/fragment.shader");
+    const char* fShaderData = Shader::readShader("C:/Users/Meate/source/repos/OpenGL/OpenGL/src/fragment.shader");
 
     glEnable(GL_DEPTH_TEST);
 
@@ -265,15 +172,18 @@ int main(void)
     VertexBuffer vb(vertices, sizeof(vertices));
     vb.CreateElementBufferObject(indices, sizeof(indices));
 
-    unsigned int shaderProgram = CreateProgram(vShaderData, fShaderData);
+    shader.createShaderProgram(vShaderData, fShaderData);
+
+    unsigned int shaderProgram = shader.getProgram();
 
     delete[] vShaderData;
     delete[] fShaderData;
 
+    //locations
     int col_loc = glGetUniformLocation(shaderProgram, "u_color");
-    int model_loc = glGetUniformLocation(shaderProgram, "model");
-    int view_loc = glGetUniformLocation(shaderProgram, "view");
-    int projection_loc = glGetUniformLocation(shaderProgram, "projection");
+    int model_loc = shader.getModelLoc();
+    int view_loc = shader.getViewLoc();
+    int projection_loc = shader.getProjectionLoc();
     int camPos_loc = glGetUniformLocation(shaderProgram, "camPos");
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),NULL);
@@ -316,6 +226,8 @@ int main(void)
 
         glUniformMatrix4fv(model_loc,1, GL_FALSE, glm::value_ptr(ApplyTransform(0,0)));
 
+        directionalLight.useLight(&shader);
+
         camera.TransformCamera(window->getKeys(),deltaTime);
         glUniform3f(camPos_loc, camera.getCameraPos().x, camera.getCameraPos().y, camera.getCameraPos().z);
 
@@ -324,8 +236,7 @@ int main(void)
         glUniformMatrix4fv(view_loc, 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
         glUniformMatrix4fv(projection_loc,1, GL_FALSE, glm::value_ptr(projection));
 
-        light.setAmbientValues(shaderProgram, "lightData.aIntensity", "lightData.aColor");
-        light.setMainLightValues(shaderProgram, "lightData.mainLightIntensity", "lightData.mainLightDir");
+        
         material.setMaterial(shaderProgram, "material.metallic", "material.smoothness");
 
         vb.BindVAO();

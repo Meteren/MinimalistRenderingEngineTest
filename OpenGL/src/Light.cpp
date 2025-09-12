@@ -1,21 +1,20 @@
 #include "Light.h"
 
-Light::Light() : aLightIntensity(0), mainLightIntensity(0)
+Light::Light() : aLightIntensity(0), directionalLightIntensity(0)
 {
 	ambientColor = glm::vec3(0, 0, 0);
-	mainLightDir = glm::vec3(0, 0, 0);
+
 }
 
-Light::~Light()
-{
-}
-
-Light::Light(float mainLightIntensity,float aLightIntensity, glm::vec3 ambientColor,glm::vec3 mainLightDir)
+Light::Light(float mainLightIntensity,float aLightIntensity, glm::vec3 ambientColor)
 {
 	this->aLightIntensity = aLightIntensity;
 	this->ambientColor = ambientColor;
-	this->mainLightDir = mainLightDir;
-	this->mainLightIntensity = mainLightIntensity;
+	this->directionalLightIntensity = mainLightIntensity;
+}
+
+void Light::useLight(Shader* shader) {
+	return;
 }
 
 void Light::setAmbientValues(int program, const char* aIntensity, const char* aColor)
@@ -34,8 +33,7 @@ void Light::setMainLightValues(int program, const char* intensity, const char* d
 	int intensityLoc = glGetUniformLocation(program, intensity);
 	int directionLoc = glGetUniformLocation(program, direction);
 
-	glUniform1f(intensityLoc, mainLightIntensity);
-	glUniform3f(directionLoc, mainLightDir.x, mainLightDir.y, mainLightDir.z);
+	glUniform1f(intensityLoc, directionalLightIntensity);
 }
 
 
@@ -48,3 +46,9 @@ float Light::getAmbientLightIntensity()
 {
 	return this->aLightIntensity;
 }
+
+
+Light::~Light()
+{
+}
+

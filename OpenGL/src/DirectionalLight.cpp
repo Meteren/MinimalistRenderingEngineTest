@@ -1,0 +1,21 @@
+#include "DirectionalLight.h"
+
+DirectionalLight::DirectionalLight(float directionalLightIntensity, float aLightIntensity, glm::vec3 ambientColor, glm::vec3 direction) 
+	: Light(directionalLightIntensity, aLightIntensity, ambientColor)
+{
+	this->direction = direction;
+
+}
+
+void DirectionalLight::useLight(Shader* shader)
+{
+	glUniform3f(shader->directionalLightUniform.u_aColor, ambientColor.x, ambientColor.y, ambientColor.z);
+	glUniform1f(shader->directionalLightUniform.u_aIntensity, aLightIntensity);
+	glUniform1f(shader->directionalLightUniform.u_directionalLightIntensity, directionalLightIntensity);
+	glUniform3f(shader->directionalLightUniform.u_direction, direction.x, direction.y, direction.z);
+	
+}
+
+DirectionalLight::~DirectionalLight()
+{
+}
