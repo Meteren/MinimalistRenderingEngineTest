@@ -7,12 +7,12 @@ DirectionalLight::DirectionalLight(float directionalLightIntensity, float aLight
 
 }
 
-void DirectionalLight::useLight(Shader* shader)
+void DirectionalLight::useLight(Shader shader)
 {
-	glUniform3f(shader->directionalLightUniform.u_aColor, ambientColor.x, ambientColor.y, ambientColor.z);
-	glUniform1f(shader->directionalLightUniform.u_aIntensity, aLightIntensity);
-	glUniform1f(shader->directionalLightUniform.u_directionalLightIntensity, directionalLightIntensity);
-	glUniform3f(shader->directionalLightUniform.u_direction, direction.x, direction.y, direction.z);
+	glUniform3f(shader.directionalLightUniform.u_aColor, ambientColor.x, ambientColor.y, ambientColor.z);
+	glUniform1f(shader.directionalLightUniform.u_aIntensity, aLightIntensity);
+	glUniform1f(shader.directionalLightUniform.u_directionalLightIntensity, directionalLightIntensity);
+	glUniform3f(shader.directionalLightUniform.u_direction, direction.x, direction.y, direction.z);
 	
 }
 

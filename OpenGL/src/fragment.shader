@@ -1,5 +1,8 @@
 #version 330 core
 
+
+const int MAX_POINT_LIGHT_COUNT = 3;
+
 out vec4 color;
 uniform vec4 u_color;
 in vec4 vertex_color;
@@ -29,9 +32,19 @@ struct DirectionalLight{
     vec3 direction;
 };
 
+struct PointLight{
+    Light base;
+    float exponent;
+    float linear;
+    float constant;
+    vec3 position;
+};
 
+uniform int pointLightCount;
 uniform Material material;
 uniform DirectionalLight directionalLight;
+uniform PointLight pointLights[MAX_POINT_LIGHT_COUNT];
+
 
 vec4 CalculatePhongLighting(Light base, vec3 direction){
 
@@ -66,12 +79,36 @@ vec4 CalculateDirectionalLight(DirectionalLight light){
     return finalLighting;
 }
 
+vec4 CalculatePointLights(){
+    vec4 finalLighting = vec4(0,0,0,0);
+
+    for(int i = 0; i < pointLightCount; i++){
+
+        vec3 direction = fragWS - pointLights[i].position;
+
+        float distance = length(direction);
+
+        direction = normalize(direction);
+
+        finalLighting += CalculatePhongLighting(pointLights[i].base,direction);
+
+        float attenuation = pointLights[i].exponent * distance * distance + pointLights[i].linear * distance + pointLights[i].constant;
+        
+        finalLighting *= 1 / attenuation;
+    }
+
+
+    return finalLighting;
+
+}
 
 void main(){
 
     vec4 overallLightCol = vec4(0,0,0,0);
 
     overallLightCol += CalculateDirectionalLight(directionalLight);
+
+    overallLightCol += CalculatePointLights();
 
     vec4 mainColor = texture(mainTex,uv);
 

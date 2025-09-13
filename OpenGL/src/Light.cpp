@@ -13,7 +13,7 @@ Light::Light(float mainLightIntensity,float aLightIntensity, glm::vec3 ambientCo
 	this->directionalLightIntensity = mainLightIntensity;
 }
 
-void Light::useLight(Shader* shader) {
+void Light::useLight(Shader shader) {
 	return;
 }
 

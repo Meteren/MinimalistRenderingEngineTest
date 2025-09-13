@@ -2,6 +2,7 @@
 
 VertexBuffer::VertexBuffer(const void* data, unsigned int size)
 {
+	this->size = size;
 	glGenVertexArrays(1, &vao_ID);
 	glBindVertexArray(vao_ID);
 	glGenBuffers(1, &b_ID);
@@ -12,6 +13,8 @@ VertexBuffer::VertexBuffer(const void* data, unsigned int size)
 VertexBuffer::~VertexBuffer() {
 	glDeleteBuffers(1, &b_ID);
 }
+
+
 
 void VertexBuffer::BindVBO() const{
 	glBindBuffer(GL_ARRAY_BUFFER, b_ID);
@@ -47,5 +50,16 @@ void VertexBuffer::CreateElementBufferObject(unsigned int* data,int count)
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_ID);
 
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, count, data, GL_STATIC_DRAW);
+
+}
+
+void VertexBuffer::render()
+{
+	glBindVertexArray(vao_ID);
+
+	glDrawElements(GL_TRIANGLES, size / sizeof(float), GL_UNSIGNED_INT, 0);
+
+	glBindVertexArray(0);
+
 
 }

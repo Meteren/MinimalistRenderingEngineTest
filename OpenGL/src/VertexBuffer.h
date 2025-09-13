@@ -6,6 +6,8 @@ class VertexBuffer {
 		unsigned int b_ID;
 		unsigned int vao_ID;
 		unsigned int ebo_ID;
+
+		unsigned int size;
 	public:
 		VertexBuffer(const void* data, unsigned int size);
 
@@ -24,4 +26,6 @@ class VertexBuffer {
 		void UnBindVAO() const;
 
 		void CreateElementBufferObject(unsigned int* data, int size);
+
+		void render();
 };
