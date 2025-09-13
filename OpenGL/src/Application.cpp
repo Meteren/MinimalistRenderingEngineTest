@@ -24,7 +24,6 @@
 #include "Shader.h"
 
 #include "PointLight.h"
-#include "Application.h"
 
 
 float degreeToRad = 3.1415f / 180;
