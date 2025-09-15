@@ -303,6 +303,8 @@ int main(void)
         glfwPollEvents();
     }
 
+    delete window;
+
     glfwTerminate();
 
     return 0;
