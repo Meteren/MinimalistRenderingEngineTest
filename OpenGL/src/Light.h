@@ -18,10 +18,7 @@ public:
 	
 	Light(float mainLightIntensity, float aLightIntensity, glm::vec3 ambientColor);
 
-	virtual void useLight(Shader shader);
-
-	void setAmbientValues(int program, const char* aIntensity, const char* aColor);
-	void setMainLightValues(int program, const char* intensity, const char* direction);
+	virtual void useLight(Shader shader, int i);
 
 	glm::vec3 getAmbientColor();
 

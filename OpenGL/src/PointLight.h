@@ -3,8 +3,7 @@
 
 class PointLight : public Light
 {
-private:
-
+protected:
 	float exponent;
 	float linear;
 	float constant;
@@ -15,12 +14,9 @@ public:
 	PointLight();
 	PointLight(float mainLightIntensity, float aLightIntensity, glm::vec3 ambientColor, float exponent, float linear, float constant, glm::vec3 position);
 
-
-	void useLight(Shader shader, int pointLightIndex);
-
+	void useLight(Shader shader, int i) override;
 
 	~PointLight();
-
 
 };
 

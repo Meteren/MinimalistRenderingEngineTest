@@ -91,7 +91,7 @@ void Window::handleMouseMovement(GLFWwindow* window, double xPos, double yPos)
 		p_window->initStart = false;
 	}
 
-	p_window->changeX =(float) xPos - p_window->lastPosX;
+	p_window->changeX = (float)xPos - p_window->lastPosX;
 	p_window->changeY = p_window->lastPosY - (float) yPos;
 
 	p_window->lastPosX = (float)xPos;

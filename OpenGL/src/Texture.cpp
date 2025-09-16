@@ -4,14 +4,16 @@
 
 Texture::Texture()
 {	
-}
-
-Texture::Texture(const char* path)
-{
 	width = 0;
 	height = 0;
 	tex_ID = 0;
 	bitDepth = 0;
+	this->path = "";
+}
+
+Texture::Texture(const char* path)
+{
+
 	this->path = path;
 }
 

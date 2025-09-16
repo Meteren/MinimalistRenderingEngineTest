@@ -12,7 +12,7 @@ private:
 public:
 	DirectionalLight(float directionalLightIntensity, float aLightIntensity, glm::vec3 ambientColor, glm::vec3 direction);
 
-    void useLight(Shader shader) override;
+    void useLight(Shader shader,int i) override;
 
 	~DirectionalLight();
 

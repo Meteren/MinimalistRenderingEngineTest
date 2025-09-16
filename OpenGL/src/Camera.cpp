@@ -66,9 +66,13 @@ glm::mat4 Camera::getViewMatrix()
 	return view;
 }
 
-glm::vec3 Camera::getCameraPos()
+glm::vec3 Camera::getPos() const
 {
 	return cameraPos;
+}
+
+glm::vec3 Camera::getDir() const {
+	return forward;
 }
 
 void Camera::setCameraRotation(Window* window,float changeX, float changeY)

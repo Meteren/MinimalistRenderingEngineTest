@@ -25,6 +25,8 @@
 
 #include "PointLight.h"
 
+#include "SpotLight.h"
+
 
 float degreeToRad = 3.1415f / 180;
 
@@ -116,14 +118,37 @@ int main(void)
     Material material = Material(1, 32);
     
     PointLight pointLights[MAX_POINT_LIGHT_COUNT];
+
+    SpotLight spotLights[MAX_SPOT_LIGHT_COUNT];
      
+
+    //point light creating
     PointLight lightOne = PointLight(2.0f, 0.01f, glm::vec3(1, 0, 0), 0.01f, 0.03f, 1.0f,glm::vec3(-4.0f,-1.0f,0.0f));
     shader.pointLightCount++;
     PointLight lightTwo = PointLight(2.0f, 0.01f, glm::vec3(0, 0, 1), 0.01f, 0.03f, 1.0f, glm::vec3(4.0f, -1.0f, 0.0f));
     shader.pointLightCount++;
-
+    
     pointLights[0] = lightOne;
     pointLights[1] = lightTwo;
+
+    //spot light creation
+
+    SpotLight spotLightOne = 
+        SpotLight(2.0f,0.01f,glm::vec3(1,1,1), 0.01f, 0.03f, 1.0f,glm::vec3(0,-1,0),60.0f,glm::vec3(0,-2,0));
+    shader.spotLightCount++;
+
+    SpotLight spotLightTwo = 
+        SpotLight(3.0f, 0.01f, glm::vec3(1, 0, 1), 0.01f, 0.03f, 1.0f, glm::vec3(5, -1, 0), 30.0f, glm::vec3(1, 0, 0));
+    shader.spotLightCount++;
+
+    SpotLight spotLightThree = 
+        SpotLight(3.0f, 0.01f, glm::vec3(0, 1, 0), 0.01f, 0.03f, 1.0f, glm::vec3(0, 0, 9), 60.0f, glm::vec3(0, -1, -10));
+    shader.spotLightCount++;
+
+    spotLights[0] = spotLightOne;
+    spotLights[1] = spotLightTwo;
+    spotLights[2] = spotLightThree;
+
 
     if (window->createWindow(1366, 780) == 1)
         return 1;
@@ -244,9 +269,10 @@ int main(void)
     float lastTime = 0;
 
     if (shader.pointLightCount > MAX_POINT_LIGHT_COUNT) shader.pointLightCount = MAX_POINT_LIGHT_COUNT;
+    if (shader.spotLightCount > MAX_SPOT_LIGHT_COUNT) shader.spotLightCount = MAX_POINT_LIGHT_COUNT;
 
     printf(" ++ Point Light Count:%d ++", shader.pointLightCount);
-
+    printf(" ++ Spot Light Count:%d ++", shader.spotLightCount);
     /* Loop until the user closes the window */
     while (!window->shouldWindowClosed())
     {
@@ -265,10 +291,12 @@ int main(void)
 
         glUniform4f(col_loc, 0.0f, abs(col_val), 0.0f, 1.0f);
         glUniform1i(shader.getPointLightCountLoc(), shader.pointLightCount);
+        glUniform1i(shader.getSpotLightCountLoc(), shader.spotLightCount);
+
 
         glUniformMatrix4fv(model_loc,1, GL_FALSE, glm::value_ptr(ApplyTransform(0,glm::vec3(0,0,-2.5f))));
 
-        directionalLight.useLight(shader);
+        directionalLight.useLight(shader, 0);
 
         //the point light loop  
         for (int i = 0; i < shader.pointLightCount; i++) {
@@ -276,8 +304,21 @@ int main(void)
         }
         //-----
 
+        spotLights[1].setCondition(window);
+
+        spotLights[1].setPosition(camera.getPos() 
+            + glm::vec3(camera.getDir().x * 0.5, camera.getDir().y * 0.5 , camera.getDir().z * 0.5) 
+            + glm::vec3(0,-0.2f,0));
+        spotLights[1].setDirection(camera.getDir());
+
+        //spot light loop
+        for (int i = 0; i < shader.spotLightCount; i++) {
+            spotLights[i].useLight(shader,i);
+        }
+        //----
+
         camera.TransformCamera(window->getKeys(),deltaTime);
-        glUniform3f(camPos_loc, camera.getCameraPos().x, camera.getCameraPos().y, camera.getCameraPos().z);
+        glUniform3f(camPos_loc, camera.getPos().x, camera.getPos().y, camera.getPos().z);
 
         camera.setCameraRotation(window,window->getChangeX(), window->getChangeY());
         camera.createViewMatrix();
@@ -301,6 +342,7 @@ int main(void)
 
         /* Poll for and process events */
         glfwPollEvents();
+        
     }
 
     delete window;

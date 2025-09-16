@@ -7,8 +7,18 @@ Shader::Shader()
     model_loc = 0;
     projection_loc = 0;
     pointLightCount = 0;
+    spotLightCount = 0;
     u_pointLightCount = 0;
-    directionalLightUniform = {0};
+    u_spotLightCount = 0;
+    uniformDirectionalLight = {0};
+    
+    for (int i = 0; i < MAX_POINT_LIGHT_COUNT; i++) {
+        uniformPointLights[i] = { 0 };
+    }
+
+    for (int i = 0; i < MAX_SPOT_LIGHT_COUNT; i++) {
+        uniformSpotLights[i] = { 0 };
+    }
     
 }
 
@@ -69,11 +79,12 @@ void Shader::createShaderProgram(const char* vShaderData, const char* fShaderDat
     u_pointLightCount = glGetUniformLocation(program, "pointLightCount");
     printf("-- Point Light Count: %d -- ", u_pointLightCount);
 
-    directionalLightUniform.u_aColor = glGetUniformLocation(program, "directionalLight.base.aColor");
-    directionalLightUniform.u_aIntensity = glGetUniformLocation(program, "directionalLight.base.aIntensity");
-    directionalLightUniform.u_directionalLightIntensity = glGetUniformLocation(program, "directionalLight.base.directionalLightIntensity");
-    directionalLightUniform.u_direction = glGetUniformLocation(program, "directionalLight.direction");
+    u_spotLightCount = glGetUniformLocation(program, "spotLightCount");
 
+    uniformDirectionalLight.u_aColor = glGetUniformLocation(program, "directionalLight.base.aColor");
+    uniformDirectionalLight.u_aIntensity = glGetUniformLocation(program, "directionalLight.base.aIntensity");
+    uniformDirectionalLight.u_directionalLightIntensity = glGetUniformLocation(program, "directionalLight.base.directionalLightIntensity");
+    uniformDirectionalLight.u_direction = glGetUniformLocation(program, "directionalLight.direction");
 
     for (int i = 0; i < MAX_POINT_LIGHT_COUNT; i++) {
 
@@ -108,6 +119,50 @@ void Shader::createShaderProgram(const char* vShaderData, const char* fShaderDat
         snprintf(buffer, sizeof(buffer), "pointLights[%d].position", i);
         uniformPointLights[i].u_position = glGetUniformLocation(program, buffer);
         printf("%d \n", uniformPointLights[i].u_position);
+    }
+
+    for (int i = 0; i < MAX_SPOT_LIGHT_COUNT; i++) {
+
+        char buffer[100] = { '\0' };
+
+        snprintf(buffer, sizeof(buffer), "spotLights[%d].pointLight.base.aColor", i);
+        uniformSpotLights[i].u_aColor = glGetUniformLocation(program, buffer);
+        printf("%d ** ", uniformSpotLights[i].u_aColor);
+        //printf("%s ** ", buffer);
+
+        snprintf(buffer, sizeof(buffer), "spotLights[%d].pointLight.base.aIntensity", i);
+        uniformSpotLights[i].u_aIntensity = glGetUniformLocation(program, buffer);
+        printf("%d ** ", uniformSpotLights[i].u_aIntensity);
+        //printf("%s ** ", buffer);
+
+        snprintf(buffer, sizeof(buffer), "spotLights[%d].pointLight.base.directionalLightIntensity", i);
+        uniformSpotLights[i].u_directionalLightIntensity = glGetUniformLocation(program, buffer);
+        printf("%d ** ", uniformSpotLights[i].u_directionalLightIntensity);
+
+        snprintf(buffer, sizeof(buffer), "spotLights[%d].pointLight.exponent", i);
+        uniformSpotLights[i].u_exponent = glGetUniformLocation(program, buffer);
+        printf("%d ** ", uniformSpotLights[i].u_exponent);
+
+        snprintf(buffer, sizeof(buffer), "spotLights[%d].pointLight.linear", i);
+        uniformSpotLights[i].u_linear = glGetUniformLocation(program, buffer);
+        printf("%d ** ", uniformSpotLights[i].u_linear);
+
+        snprintf(buffer, sizeof(buffer), "spotLights[%d].pointLight.constant", i);
+        uniformSpotLights[i].u_constant = glGetUniformLocation(program, buffer);
+        printf("%d ** ", uniformSpotLights[i].u_constant);
+
+        snprintf(buffer, sizeof(buffer), "spotLights[%d].pointLight.position", i);
+        uniformSpotLights[i].u_position = glGetUniformLocation(program, buffer);
+        printf("%d \n", uniformSpotLights[i].u_position);
+
+        snprintf(buffer, sizeof(buffer), "spotLights[%d].direction", i);
+        uniformSpotLights[i].u_direction = glGetUniformLocation(program, buffer);
+        printf("%d \n", uniformSpotLights[i].u_position);
+
+        snprintf(buffer, sizeof(buffer), "spotLights[%d].cutOff", i);
+        uniformSpotLights[i].u_cutOff = glGetUniformLocation(program, buffer);
+        printf("%d \n", uniformSpotLights[i].u_position);
+
     }
 
 }
@@ -163,6 +218,11 @@ int Shader::getProjectionLoc() const
 int Shader::getPointLightCountLoc() const
 {
     return u_pointLightCount;
+}
+
+int Shader::getSpotLightCountLoc() const
+{
+    return u_spotLightCount;
 }
 
 void Shader::deleteProgram()

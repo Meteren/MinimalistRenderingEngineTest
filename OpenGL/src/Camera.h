@@ -37,7 +37,8 @@ public:
 
 	glm::mat4 getViewMatrix();
 
-	glm::vec3 getCameraPos();
+	glm::vec3 getPos() const;
+	glm::vec3 getDir() const;
 
 
 	void setCameraRotation(Window* window,float changeX,float changeY);

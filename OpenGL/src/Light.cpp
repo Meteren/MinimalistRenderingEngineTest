@@ -13,29 +13,10 @@ Light::Light(float mainLightIntensity,float aLightIntensity, glm::vec3 ambientCo
 	this->directionalLightIntensity = mainLightIntensity;
 }
 
-void Light::useLight(Shader shader) {
+
+void Light::useLight(Shader shader, int i) {
 	return;
 }
-
-void Light::setAmbientValues(int program, const char* aIntensity, const char* aColor)
-{
-	int intensityLoc = glGetUniformLocation(program,aIntensity);
-	int aColorLoc = glGetUniformLocation(program, aColor);
-
-	glUniform1f(intensityLoc,aLightIntensity);
-	glUniform3f(aColorLoc, ambientColor.x, ambientColor.y, ambientColor.z);
-
-}
-
-void Light::setMainLightValues(int program, const char* intensity, const char* direction)
-{
-
-	int intensityLoc = glGetUniformLocation(program, intensity);
-	int directionLoc = glGetUniformLocation(program, direction);
-
-	glUniform1f(intensityLoc, directionalLightIntensity);
-}
-
 
 glm::vec3 Light::getAmbientColor()
 {
