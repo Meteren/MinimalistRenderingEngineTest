@@ -17,12 +17,12 @@ Texture::Texture(const char* path)
 	this->path = path;
 }
 
-void Texture::loadTexture()
+bool Texture::loadTexture()
 {
     unsigned char* data = stbi_load(path, &width, &height, &bitDepth, 0);
 
 	if (!data)
-		return;
+		return false;
 
 	glGenTextures(1, &tex_ID);
 	bindTexture();
@@ -38,6 +38,8 @@ void Texture::loadTexture()
 	stbi_image_free(data);
 
 	unbindTexture();
+
+	return true;
 
 }
 

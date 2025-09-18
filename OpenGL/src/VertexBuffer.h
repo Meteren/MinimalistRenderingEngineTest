@@ -8,8 +8,11 @@ class VertexBuffer {
 		unsigned int ebo_ID;
 
 		unsigned int size;
+
+		void CreateElementBufferObject(const void* data, unsigned int sizeIndices);
+
 	public:
-		VertexBuffer(const void* data, unsigned int size);
+		VertexBuffer(const void* verticeData, const void* indiceData, unsigned int sizeVertices, unsigned int sizeIndices);
 
 		~VertexBuffer();
 
@@ -24,8 +27,6 @@ class VertexBuffer {
 		void BindVAO() const;
 		
 		void UnBindVAO() const;
-
-		void CreateElementBufferObject(unsigned int* data, int size);
 
 		void render();
 };

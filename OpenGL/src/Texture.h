@@ -18,7 +18,7 @@ public:
 
 	Texture(const char* path);
 
-	void loadTexture();
+	bool loadTexture();
 
 	void useTexture();
 

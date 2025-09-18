@@ -228,8 +228,7 @@ int main(void)
         printf("%f\n", vertices[i + 7]);
     }*/
 
-    VertexBuffer vb(vertices, sizeof(vertices));
-    vb.CreateElementBufferObject(indices, sizeof(indices));
+    VertexBuffer vb(vertices,indices, sizeof(vertices) / sizeof(float), sizeof(indices)/sizeof(unsigned int));
 
 
     shader.createShaderProgram(vShaderData, fShaderData);
@@ -256,8 +255,7 @@ int main(void)
 
     vb.UnBindVAO();
     //vbPlane.UnBindVAO();
-    VertexBuffer vbPlane(verticesPlane, sizeof(verticesPlane));
-    vbPlane.CreateElementBufferObject(indicesPlane, sizeof(indicesPlane));
+    VertexBuffer vbPlane(verticesPlane,indicesPlane, sizeof(verticesPlane) / sizeof(float), sizeof(indicesPlane) / sizeof(unsigned int));
 
     setVertexAttribPointers();
 
