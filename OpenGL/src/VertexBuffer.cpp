@@ -1,5 +1,13 @@
 #include "VertexBuffer.h"
 
+VertexBuffer::VertexBuffer()
+{
+	b_ID = 0;
+	ebo_ID = 0;
+	vao_ID = 0;
+	size = 0;
+}
+
 VertexBuffer::VertexBuffer(const void* verticeData, const void* indiceData, unsigned int sizeVertices, unsigned int sizeIndices)
 {
 	this->size = sizeVertices;
@@ -51,6 +59,13 @@ void VertexBuffer::CreateElementBufferObject(const void* data, unsigned int size
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_ID);
 
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeIndices * sizeof(unsigned int), data, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), nullptr);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
+	glEnableVertexAttribArray(2);
 
 }
 

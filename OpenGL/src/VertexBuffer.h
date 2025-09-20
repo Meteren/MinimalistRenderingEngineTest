@@ -12,6 +12,8 @@ class VertexBuffer {
 		void CreateElementBufferObject(const void* data, unsigned int sizeIndices);
 
 	public:
+		VertexBuffer();
+
 		VertexBuffer(const void* verticeData, const void* indiceData, unsigned int sizeVertices, unsigned int sizeIndices);
 
 		~VertexBuffer();

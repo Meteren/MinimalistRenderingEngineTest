@@ -18,7 +18,6 @@ private:
 	std::string path;
 	std::vector<int> meshToTex;
  
-	void loadModel();
 	void loadNode(aiNode* node, const aiScene* scene);
 	void loadMesh(aiMesh* mesh, const aiScene* scene);
 	void loadMaterial(const aiScene* scene);
@@ -26,10 +25,11 @@ private:
 public:
 	Model();
 
-	Model(std::string& path);
+	Model(const std::string& path);
 
 	~Model();
 
+	void loadModel();
 	void renderModel();
 	void clearModel();
 };

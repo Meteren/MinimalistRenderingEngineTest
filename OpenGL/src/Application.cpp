@@ -27,6 +27,8 @@
 
 #include "SpotLight.h"
 
+#include "Model.h"
+
 
 float degreeToRad = 3.1415f / 180;
 
@@ -38,11 +40,11 @@ static float ColorVal() {
     return value;
 }
 
-static glm::mat4x4 ApplyTransform(float rVal, glm::vec3 positionToMove) {
+static glm::mat4x4 ApplyTransform(float rVal, glm::vec3 positionToMove,glm::vec3 scaleVector) {
     glm::mat4x4 model(1.0f);
     model = glm::translate(model, positionToMove);
     model = glm::rotate(model, rVal* degreeToRad, glm::vec3(0, 0, 1));
-    //model = glm::scale(model, glm::vec3(0.4f, 0.4f, 1.0f));
+    model = glm::scale(model, scaleVector);
     return model;
 }
 
@@ -97,15 +99,7 @@ void setNormals(float* verticeData,int stride,int indiceCount,int normalOffset,i
 
 }
 
-void setVertexAttribPointers()
-{
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), NULL);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-}
+
 
 int main(void)
 {
@@ -120,7 +114,6 @@ int main(void)
     PointLight pointLights[MAX_POINT_LIGHT_COUNT];
 
     SpotLight spotLights[MAX_SPOT_LIGHT_COUNT];
-     
 
     //point light creating
     PointLight lightOne = PointLight(2.0f, 0.01f, glm::vec3(1, 0, 0), 0.01f, 0.03f, 1.0f,glm::vec3(-4.0f,-1.0f,0.0f));
@@ -245,7 +238,7 @@ int main(void)
     int projection_loc = shader.getProjectionLoc();
     int camPos_loc = glGetUniformLocation(shaderProgram, "camPos");
 
-    setVertexAttribPointers();
+    //setVertexAttribPointers();
 
     glm::mat4 projection(1.0f);
 
@@ -257,7 +250,7 @@ int main(void)
     //vbPlane.UnBindVAO();
     VertexBuffer vbPlane(verticesPlane,indicesPlane, sizeof(verticesPlane) / sizeof(float), sizeof(indicesPlane) / sizeof(unsigned int));
 
-    setVertexAttribPointers();
+    //setVertexAttribPointers();
 
     vbPlane.UnBindVAO();
 
@@ -271,6 +264,13 @@ int main(void)
 
     printf(" ++ Point Light Count:%d ++", shader.pointLightCount);
     printf(" ++ Spot Light Count:%d ++", shader.spotLightCount);
+
+    Model modelHouse = Model("C:/Users/Meate/source/repos/OpenGL/OpenGL/src/Models/cottage_obj.obj");
+    modelHouse.loadModel();
+
+    Model modelXwing = Model("C:/Users/Meate/source/repos/OpenGL/OpenGL/src/Models/x-wing.obj.obj");
+    modelXwing.loadModel();
+
     /* Loop until the user closes the window */
     while (!window->shouldWindowClosed())
     {
@@ -292,7 +292,7 @@ int main(void)
         glUniform1i(shader.getSpotLightCountLoc(), shader.spotLightCount);
 
 
-        glUniformMatrix4fv(model_loc,1, GL_FALSE, glm::value_ptr(ApplyTransform(0,glm::vec3(0,0,-2.5f))));
+        glUniformMatrix4fv(model_loc,1, GL_FALSE, glm::value_ptr(ApplyTransform(0,glm::vec3(0,0,-2.5f),glm::vec3(1,1,1))));
 
         directionalLight.useLight(shader, 0);
 
@@ -322,16 +322,22 @@ int main(void)
         camera.createViewMatrix();
         glUniformMatrix4fv(view_loc, 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
         glUniformMatrix4fv(projection_loc,1, GL_FALSE, glm::value_ptr(projection));
-
-        
+ 
         material.setMaterial(shaderProgram, "material.metallic", "material.smoothness");
 
-        //glDrawArrays(GL_TRIANGLES,0,3);
         vb.render();
 
-        glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(ApplyTransform(0, glm::vec3(0,-2.0f,0.0f))));
+        glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(ApplyTransform(0, glm::vec3(0,-2.0f,0.0f), glm::vec3(1, 1, 1))));
 
         vbPlane.render();
+
+        glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(ApplyTransform(0, glm::vec3(-4,-1, 5), glm::vec3(0.003f, 0.003f, 0.003f))));
+
+        modelXwing.renderModel();
+
+        glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(ApplyTransform(0, glm::vec3(40, -2, 0), glm::vec3(1, 1, 1))));
+
+        modelHouse.renderModel();
 
         glUseProgram(0);
    

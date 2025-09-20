@@ -6,10 +6,9 @@ Model::Model()
 	path = "";
 }
 
-Model::Model(std::string& path)
+Model::Model(const std::string& path)
 {
 	this->path = path;
-	loadModel();
 }
 
 
@@ -61,7 +60,7 @@ void Model::loadMesh(aiMesh* mesh, const aiScene* scene)
 			vertices.insert(vertices.end(), { 0.0f,0.0f });
 		}
 
-		vertices.insert(vertices.end(), { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z});
+		vertices.insert(vertices.end(), { -mesh->mNormals[i].x, -mesh->mNormals[i].y, -mesh->mNormals[i].z});
 
 	}
 
@@ -82,7 +81,8 @@ void Model::loadMesh(aiMesh* mesh, const aiScene* scene)
 
 void Model::loadMaterial(const aiScene* scene)
 {
-	
+	textures.resize(scene->mNumMaterials);
+
 	for (size_t i = 0; i < scene->mNumMaterials; i++) {
 		aiMaterial* material = scene->mMaterials[i];
 		
@@ -97,15 +97,22 @@ void Model::loadMaterial(const aiScene* scene)
 				Texture* texture = new Texture(tPath.c_str());
 
 				if (texture->loadTexture()) {
-					printf("Model texture %s is loaded sucessfully.",tName.c_str());
+					printf("Model texture %s is loaded sucessfully.\n",tName.c_str());
 				}
 				else{
-					printf("Model texture %s can't be loaded. Using default texture.",tName.c_str());
+					printf("Model texture %s can't be loaded. Using default texture.\n",tName.c_str());
 					delete texture;
-					texture = new Texture("C:/Users/Meate/source/repos/OpenGL/OpenGL/src/Textures/brick.png");
+					texture = new Texture("C:/Users/Meate/source/repos/OpenGL/OpenGL/src/Textures/cottage_diffuse.png");
+					texture->loadTexture();
 				}
 				textures[i] = texture;
 			}
+		}
+		else {
+			printf("No diffuse texture can be found. Using the default one..\n");
+			Texture* texture = new Texture("C:/Users/Meate/source/repos/OpenGL/OpenGL/src/Textures/cottage_diffuse.png");
+			texture->loadTextureA();
+			textures[i] = texture;
 		}
 
 	}
