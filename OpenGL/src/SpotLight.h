@@ -30,6 +30,8 @@ public:
 
 	void setCondition(Window* window);
 
+	bool getSpotLightStatus() const;
+
 	~SpotLight();
 
 };

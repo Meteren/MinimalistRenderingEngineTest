@@ -10,6 +10,8 @@ Shader::Shader()
     spotLightCount = 0;
     u_pointLightCount = 0;
     u_spotLightCount = 0;
+    u_dLightTransform = 0;
+    u_dShadowMap = 0;
     uniformDirectionalLight = {0};
     
     for (int i = 0; i < MAX_POINT_LIGHT_COUNT; i++) {
@@ -72,6 +74,8 @@ void Shader::createShaderProgram(const char* vShaderData, const char* fShaderDat
         return;
     }
 
+    validateProgram();
+
     model_loc = glGetUniformLocation(program, "model");
     view_loc = glGetUniformLocation(program, "view");
     projection_loc = glGetUniformLocation(program, "projection");
@@ -80,6 +84,9 @@ void Shader::createShaderProgram(const char* vShaderData, const char* fShaderDat
     printf("-- Point Light Count: %d -- ", u_pointLightCount);
 
     u_spotLightCount = glGetUniformLocation(program, "spotLightCount");
+
+    u_dLightTransform = glGetUniformLocation(program, "dLightTranform");
+    u_dShadowMap = glGetUniformLocation(program, "dShadowMap");
 
     uniformDirectionalLight.u_aColor = glGetUniformLocation(program, "directionalLight.base.aColor");
     uniformDirectionalLight.u_aIntensity = glGetUniformLocation(program, "directionalLight.base.aIntensity");
@@ -167,6 +174,11 @@ void Shader::createShaderProgram(const char* vShaderData, const char* fShaderDat
 
 }
 
+void Shader::useProgram()
+{
+    glUseProgram(program);
+}
+
 const char* Shader::readShader(const char* path)
 {
     std::string line;
@@ -200,6 +212,24 @@ unsigned int Shader::getProgram() const {
     return program;
 }
 
+void Shader::validateProgram()
+{
+    char errorLog[512];
+
+    int status;
+
+    glGetProgramiv(program, GL_VALIDATE_STATUS, &status);
+
+    if (!status) {
+        glGetProgramInfoLog(program, 512, NULL, errorLog);
+        printf("%s", errorLog);
+    }
+    else {
+        printf("Validation succeeded.\n");
+    }
+
+}
+
 int Shader::getModelLoc() const
 {
     return model_loc;
@@ -223,6 +253,16 @@ int Shader::getPointLightCountLoc() const
 int Shader::getSpotLightCountLoc() const
 {
     return u_spotLightCount;
+}
+
+int Shader::getdShadowMapLoc() const
+{
+    return u_dShadowMap;
+}
+
+int Shader::getdLightTransformLoc() const
+{
+    return u_dLightTransform;
 }
 
 void Shader::deleteProgram()

@@ -1,17 +1,17 @@
 #include "SpotLight.h"
 
 
-SpotLight::SpotLight() : PointLight(), cutOff(0), procCutOff(0), direction(glm::vec3(0, 0, 0)), active(false),holdingKey(false) {}
+SpotLight::SpotLight() : PointLight(), cutOff(0), procCutOff(0), direction(glm::vec3(0, 0, 0)), active(true),holdingKey(false) {}
 
 
 SpotLight::SpotLight(float mainLightIntensity, float aLightIntensity, glm::vec3 ambientColor, 
 	float exponent, float linear, float constant, glm::vec3 position, float cutOff, glm::vec3 direction) 
-	: PointLight(mainLightIntensity,aLightIntensity,ambientColor,exponent,linear,constant,position)
+	: PointLight(mainLightIntensity,aLightIntensity,ambientColor,exponent,linear,constant,position,1024,1024)
 {
 	this->cutOff = cutOff;
 	this->direction = direction;
-
 	this->procCutOff = cosf(glm::radians(this->cutOff));
+	this->active = true;
 }
 
 void SpotLight::useLight(Shader shader, int i)
@@ -56,12 +56,17 @@ void SpotLight::setCondition(Window* window)
 		else
 			active = false;
 		holdingKey = true;
-		printf("set");
+		printf("set\n");
 	}
 	else if (glfwGetKey(window->getWindow(), GLFW_KEY_F) == GLFW_RELEASE){
 		holdingKey = false;
 	}
 
+}
+
+bool SpotLight::getSpotLightStatus() const
+{
+	return active;
 }
 
 

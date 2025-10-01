@@ -18,6 +18,8 @@ private:
 	int projection_loc;	
 	int u_pointLightCount;
 	int u_spotLightCount;
+	int u_dLightTransform;
+	int u_dShadowMap;
 
 public:
 
@@ -30,7 +32,6 @@ public:
 		int u_directionalLightIntensity;
 		int u_direction;
 	} uniformDirectionalLight;
-
 
 	struct {
 		int u_aColor;
@@ -60,15 +61,22 @@ public:
 
 	void createShaderProgram(const char* vShaderData, const char* fShaderData);
 
+	void useProgram();
+
 	static const char* readShader(const char* path);
 
     unsigned int getProgram() const;
+
+	void validateProgram();
 
 	int getModelLoc() const;
 	int getViewLoc() const;
 	int getProjectionLoc() const;
 	int getPointLightCountLoc() const;
 	int getSpotLightCountLoc() const;
+	int getdShadowMapLoc() const;
+	int getdLightTransformLoc() const;
+
 
 	void deleteProgram();
 

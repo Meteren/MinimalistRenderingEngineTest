@@ -13,6 +13,7 @@ in vec3 normalWS;
 in vec3 fragWS;
 
 uniform sampler2D mainTex;
+uniform sampler2D dShadowMap;
 
 uniform vec3 camPos;
 
@@ -53,6 +54,7 @@ uniform Material material;
 uniform DirectionalLight directionalLight;
 uniform PointLight pointLights[MAX_POINT_LIGHT_COUNT];
 uniform SpotLight spotLights[MAX_SPOT_LIGHT_COUNT];
+
 
 
 vec4 CalculatePhongLighting(Light base, vec3 direction){
@@ -114,8 +116,8 @@ vec4 CalculateSpotLight(SpotLight spotLight){
 
     float angle = dot(fragDir,normalize(spotLight.direction));
 
-    //float lit = step(spotLight.cutOff,angle);
-    float lit = smoothstep(spotLight.cutOff,1,angle);
+    float lit = step(spotLight.cutOff,angle);
+    //float lit = smoothstep(spotLight.cutOff,1,angle);
 
     float normalizedVal = pow(lit * ((angle - spotLight.cutOff) * (1.0f / (1-spotLight.cutOff))),2);
     

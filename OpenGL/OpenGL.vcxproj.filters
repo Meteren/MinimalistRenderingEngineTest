@@ -51,6 +51,12 @@
     <ClCompile Include="src\Model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\ShadowMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DirectionalShadowMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\VertexBuffer.h">
@@ -86,5 +92,83 @@
     <ClInclude Include="src\Model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GlobalValues.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ShadowMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DirectionalShadowMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\Shaders\vertex.shader" />
+    <None Include="src\Shaders\fragment.shader" />
+    <None Include="src\Shaders\directionalSMf.shader" />
+    <None Include="src\Shaders\directionalSMv.shader" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="src\Textures\BIBBUMP.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\Textures\brick.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\Textures\cottage_diffuse.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\Textures\dirt.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\Textures\ENGINE.tga" />
+    <Image Include="src\Textures\ENGINE2.tga" />
+    <Image Include="src\Textures\FRC.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\Textures\fuselage.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\Textures\land.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\Textures\LASER.tga" />
+    <Image Include="src\Textures\Main_Def.tga" />
+    <Image Include="src\Textures\Main_Nor.tga" />
+    <Image Include="src\Textures\Main_Spec.tga" />
+    <Image Include="src\Textures\Minigun_.tga" />
+    <Image Include="src\Textures\Ministan.tga" />
+    <Image Include="src\Textures\pal.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\Textures\panel.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\Textures\plain.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\Textures\PLATEOX2.tga" />
+    <Image Include="src\Textures\Plt.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\Textures\REFMAP.gif">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\Textures\Track_Al.tga" />
+    <Image Include="src\Textures\Track_De.tga" />
+    <Image Include="src\Textures\Track_No.tga" />
+    <Image Include="src\Textures\Track_Sp.tga" />
+    <Image Include="src\Textures\WINGBACK.tga" />
+    <Image Include="src\Textures\WINGDOWN.tga" />
+    <Image Include="src\Textures\WINGFRON.tga" />
+    <Image Include="src\Textures\WINGTOP.tga" />
+    <Image Include="src\Textures\XSIDE.tga" />
+    <Image Include="src\Textures\XWBACK.tga" />
+    <Image Include="src\Textures\XWDOWN.tga" />
+    <Image Include="src\Textures\XWTOP.tga" />
+    <Image Include="src\Textures\Camo\Main_Defuse.tga" />
   </ItemGroup>
 </Project>

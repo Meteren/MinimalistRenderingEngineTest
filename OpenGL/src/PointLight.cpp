@@ -8,12 +8,13 @@ PointLight::PointLight()
 	position = glm::vec3(0, 0, 0);
 }
 
-PointLight::PointLight(float mainLightIntensity, float aLightIntensity, glm::vec3 ambientColor, float exponent, float linear, float constant, glm::vec3 position)
-	:Light(mainLightIntensity,aLightIntensity,ambientColor)
+PointLight::PointLight(float mainLightIntensity, float aLightIntensity, glm::vec3 ambientColor, float exponent, 
+	float linear, float constant, glm::vec3 position,int shadowMapWidth,int shadowMapHeight)
+	: Light(mainLightIntensity,aLightIntensity,ambientColor,shadowMapWidth,shadowMapHeight)
 {
 	this->exponent = exponent;
 	this->linear = linear;
-	this->constant = constant < 1 ? 1 : constant;
+	this->constant = constant;
 	this->position = position;
 }
 

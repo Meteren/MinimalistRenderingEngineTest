@@ -19,6 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\DirectionalShadowMap.cpp" />
+    <ClCompile Include="src\ShadowMap.cpp" />
     <ClCompile Include="src\Model.cpp" />
     <ClCompile Include="src\SpotLight.cpp" />
     <ClCompile Include="src\PointLight.cpp" />
@@ -33,6 +35,9 @@
     <ClCompile Include="src\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\DirectionalShadowMap.h" />
+    <ClInclude Include="src\ShadowMap.h" />
+    <ClInclude Include="src\GlobalValues.h" />
     <ClInclude Include="src\Model.h" />
     <ClInclude Include="src\SpotLight.h" />
     <ClInclude Include="src\PointLight.h" />
@@ -41,9 +46,52 @@
     <ClInclude Include="src\Material.h" />
     <ClInclude Include="src\Light.h" />
     <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\stb_image.h" />
     <ClInclude Include="src\VertexBuffer.h" />
     <ClInclude Include="src\Window.h" />
     <ClInclude Include="src\Texture.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\Shaders\directionalSMf.shader" />
+    <None Include="src\Shaders\directionalSMv.shader" />
+    <None Include="src\Shaders\fragment.shader" />
+    <None Include="src\Shaders\vertex.shader" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="src\Textures\BIBBUMP.jpg" />
+    <Image Include="src\Textures\brick.png" />
+    <Image Include="src\Textures\Camo\Main_Defuse.tga" />
+    <Image Include="src\Textures\cottage_diffuse.png" />
+    <Image Include="src\Textures\dirt.png" />
+    <Image Include="src\Textures\ENGINE.tga" />
+    <Image Include="src\Textures\ENGINE2.tga" />
+    <Image Include="src\Textures\FRC.jpg" />
+    <Image Include="src\Textures\fuselage.jpg" />
+    <Image Include="src\Textures\land.jpg" />
+    <Image Include="src\Textures\LASER.tga" />
+    <Image Include="src\Textures\Main_Def.tga" />
+    <Image Include="src\Textures\Main_Nor.tga" />
+    <Image Include="src\Textures\Main_Spec.tga" />
+    <Image Include="src\Textures\Minigun_.tga" />
+    <Image Include="src\Textures\Ministan.tga" />
+    <Image Include="src\Textures\pal.jpg" />
+    <Image Include="src\Textures\panel.jpg" />
+    <Image Include="src\Textures\plain.png" />
+    <Image Include="src\Textures\PLATEOX2.tga" />
+    <Image Include="src\Textures\Plt.jpg" />
+    <Image Include="src\Textures\REFMAP.gif" />
+    <Image Include="src\Textures\Track_Al.tga" />
+    <Image Include="src\Textures\Track_De.tga" />
+    <Image Include="src\Textures\Track_No.tga" />
+    <Image Include="src\Textures\Track_Sp.tga" />
+    <Image Include="src\Textures\WINGBACK.tga" />
+    <Image Include="src\Textures\WINGDOWN.tga" />
+    <Image Include="src\Textures\WINGFRON.tga" />
+    <Image Include="src\Textures\WINGTOP.tga" />
+    <Image Include="src\Textures\XSIDE.tga" />
+    <Image Include="src\Textures\XWBACK.tga" />
+    <Image Include="src\Textures\XWDOWN.tga" />
+    <Image Include="src\Textures\XWTOP.tga" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
