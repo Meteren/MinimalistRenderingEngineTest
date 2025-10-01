@@ -1,5 +1,4 @@
 
-
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
@@ -33,12 +32,18 @@
 
 #include <vector>
 
+
 std::vector<Model*> models;
 std::vector<VertexBuffer*> meshes;
 
 std::vector<Shader*> shaders;
 
+std::vector<Texture*> textures;
+
+std::vector<Material*> materials;
+
 float degreeToRad = 3.1415f / 180;
+float lastTime = 0;
 
 Shader mainShader = Shader();
 
@@ -112,10 +117,6 @@ void setNormals(float* verticeData, int stride, int indiceCount, int normalOffse
 
 }
 
-void dShadowMapRenderPass() {
-
-}
-
 void RenderObjects(Shader* shader) {
 
     glUniformMatrix4fv(shader->getModelLoc(), 1, GL_FALSE, glm::value_ptr(ApplyTransform(0, glm::vec3(0, 0, -2.5f), glm::vec3(1, 1, 1))));
@@ -135,6 +136,81 @@ void RenderObjects(Shader* shader) {
     models[0]->renderModel();
 }
 
+void dShadowMapRenderPass(DirectionalLight* light) {
+
+    shaders[1]->useProgram();
+
+    glViewport(0, 0, light->getShadowMapWidth(), light->getShadowMapHeight());
+
+    light->getShadowMap()->writeBuffer();
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    light->attachDepthElement(shaders[1]);
+
+    RenderObjects(shaders[1]);
+
+    glUseProgram(0);
+
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+}
+
+void mainRenderPass(glm::mat4 projection, DirectionalLight* directionalLight, 
+    PointLight* pointLights, SpotLight* spotLights, Camera &camera, Window* window) {
+
+    float currTime = (float)glfwGetTime();
+
+    float deltaTime = currTime - lastTime;
+
+    lastTime = currTime;
+    shaders[0]->useProgram();
+
+    glViewport(0, 0, window->fbWidth, window->fbHeight);
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    textures[0]->useTexture();
+
+    glUniform1i(shaders[0]->getPointLightCountLoc(), shaders[0]->pointLightCount);
+    glUniform1i(shaders[0]->getSpotLightCountLoc(), shaders[0]->spotLightCount);
+
+    directionalLight->attachDepthElement(shaders[0]);
+
+    directionalLight->attachdShadowMap(*shaders[0]);
+
+    directionalLight->useLight(*shaders[0], 0);
+ 
+    for (int i = 0; i < shaders[0]->pointLightCount; i++) {
+        pointLights[i].useLight(*shaders[0], i);
+    }
+
+    spotLights[1].setCondition(window);
+
+    spotLights[1].setPosition(camera.getPos()
+        + glm::vec3(camera.getDir().x * 0.5, camera.getDir().y * 0.5, camera.getDir().z * 0.5)
+        + glm::vec3(0, -0.2f, 0));
+    spotLights[1].setDirection(camera.getDir());
+
+    //spot light loop
+    for (int i = 0; i < mainShader.spotLightCount; i++) {
+        spotLights[i].useLight(mainShader, i);
+    }
+    //----
+    camera.TransformCamera(window->getKeys(), deltaTime);
+    glUniform3f(shaders[0]->getCamPosLoc(), camera.getPos().x, camera.getPos().y, camera.getPos().z);
+
+    camera.setCameraRotation(window, window->getChangeX(), window->getChangeY());
+    camera.createViewMatrix();
+
+    glUniformMatrix4fv(shaders[0]->getViewLoc(), 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
+    glUniformMatrix4fv(shaders[0]->getProjectionLoc(), 1, GL_FALSE, glm::value_ptr(projection));
+
+    materials[0]->setMaterial(shaders[0]->getProgram(), "material.metallic", "material.smoothness");
+
+    RenderObjects(shaders[0]);
+
+    glUseProgram(0);
+}
 
 int main(void)
 {
@@ -150,9 +226,11 @@ int main(void)
         std::cout << "Error occured!" << std::endl;
     }
 
-    DirectionalLight directionalLight = DirectionalLight(0.2f, 0.2f, glm::vec3(1, 1, 1), glm::vec3(-2, -1, 2), 1024, 1024);
+    DirectionalLight directionalLight = DirectionalLight(0.5f, 0.2f, glm::vec3(1, 1, 1), glm::vec3(-500, -500, 500), 8192, 8192);
 
     Material material = Material(1, 32);
+
+    materials.push_back(&material);
 
     PointLight pointLights[MAX_POINT_LIGHT_COUNT];
 
@@ -265,19 +343,10 @@ int main(void)
     meshes.push_back(&vb);
 
     mainShader.createShaderProgram(vShaderData, fShaderData);
-    //depthShader.createShaderProgram(depthShaderVData, depthShaderFData);
-
-    unsigned int shaderProgram = shaders[0]->getProgram();
+    depthShader.createShaderProgram(depthShaderVData, depthShaderFData);
 
     delete[] vShaderData;
     delete[] fShaderData;
-
-    //locations
-    int col_loc = glGetUniformLocation(shaderProgram, "u_color");
-    int model_loc = mainShader.getModelLoc();
-    int view_loc = mainShader.getViewLoc();
-    int projection_loc = mainShader.getProjectionLoc();
-    int camPos_loc = glGetUniformLocation(shaderProgram, "camPos");
 
     glm::mat4 projection(1.0f);
 
@@ -286,7 +355,7 @@ int main(void)
     Camera camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 5.0f, 0.1f);
 
     vb.UnBindVAO();
-    //vbPlane.UnBindVAO();
+
     VertexBuffer vbPlane(verticesPlane, indicesPlane, sizeof(verticesPlane) / sizeof(float), sizeof(indicesPlane) / sizeof(unsigned int));
     meshes.push_back(&vbPlane);
 
@@ -294,8 +363,7 @@ int main(void)
 
     Texture mainTexture = Texture("C:/Users/Meate/source/repos/OpenGL/OpenGL/src/Textures/brick.png");
     mainTexture.loadTexture();
-
-    float lastTime = 0;
+    textures.push_back(&mainTexture);
 
     if (mainShader.pointLightCount > MAX_POINT_LIGHT_COUNT) mainShader.pointLightCount = MAX_POINT_LIGHT_COUNT;
     if (mainShader.spotLightCount > MAX_SPOT_LIGHT_COUNT) mainShader.spotLightCount = MAX_POINT_LIGHT_COUNT;
@@ -311,65 +379,14 @@ int main(void)
     models.push_back(&modelXwing);
     modelXwing.loadModel();
 
-    /* Loop until the user closes the window */
     while (!window->shouldWindowClosed())
     {
-        float currTime = (float)glfwGetTime();
+        dShadowMapRenderPass(&directionalLight);
 
-        float deltaTime = currTime - lastTime;
+        mainRenderPass(projection, &directionalLight, pointLights, spotLights, camera, window);
 
-        lastTime = currTime;
-        /* Render here */
-        //glClearColor(0.2f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        mainTexture.useTexture();
-        glUseProgram(shaderProgram);
-
-        float col_val = ColorVal();
-
-        glUniform4f(col_loc, 0.0f, abs(col_val), 0.0f, 1.0f);
-        glUniform1i(mainShader.getPointLightCountLoc(), mainShader.pointLightCount);
-        glUniform1i(mainShader.getSpotLightCountLoc(), mainShader.spotLightCount);
-
-        directionalLight.useLight(mainShader, 0);
-
-        //the point light loop  
-        for (int i = 0; i < shaders[0]->pointLightCount; i++) {
-            pointLights[i].useLight(*shaders[0], i);
-        }
-        //-----
-
-        spotLights[1].setCondition(window);
-
-        spotLights[1].setPosition(camera.getPos()
-            + glm::vec3(camera.getDir().x * 0.5, camera.getDir().y * 0.5, camera.getDir().z * 0.5)
-            + glm::vec3(0, -0.2f, 0));
-        spotLights[1].setDirection(camera.getDir());
-
-        //spot light loop
-        for (int i = 0; i < mainShader.spotLightCount; i++) {
-            spotLights[i].useLight(mainShader, i);
-        }
-        //----
-
-        camera.TransformCamera(window->getKeys(), deltaTime);
-        glUniform3f(camPos_loc, camera.getPos().x, camera.getPos().y, camera.getPos().z);
-
-        camera.setCameraRotation(window, window->getChangeX(), window->getChangeY());
-        camera.createViewMatrix();
-        glUniformMatrix4fv(view_loc, 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
-        glUniformMatrix4fv(projection_loc, 1, GL_FALSE, glm::value_ptr(projection));
-
-        material.setMaterial(shaderProgram, "material.metallic", "material.smoothness");
-
-        RenderObjects(shaders[0]);
-
-        glUseProgram(0);
-
-        /* Swap front and back buffers */
         glfwSwapBuffers(window->getWindow());
 
-        /* Poll for and process events */
         glfwPollEvents();
 
     }

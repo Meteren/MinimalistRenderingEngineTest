@@ -20,6 +20,7 @@ private:
 	int u_spotLightCount;
 	int u_dLightTransform;
 	int u_dShadowMap;
+	int u_camPos;
 
 public:
 
@@ -76,6 +77,7 @@ public:
 	int getSpotLightCountLoc() const;
 	int getdShadowMapLoc() const;
 	int getdLightTransformLoc() const;
+	int getCamPosLoc() const;
 
 
 	void deleteProgram();

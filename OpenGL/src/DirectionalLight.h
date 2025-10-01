@@ -9,7 +9,7 @@ class DirectionalLight :
 {
 private:
 	glm::vec3 direction;
-	glm::mat4 dLightTranfsorm;
+	glm::mat4 dLightTransform;
 	glm::mat4 ortho;
 
 public:
@@ -26,7 +26,7 @@ public:
 
 	void attachdShadowMap(Shader shader);
 
-	void attachDepthElements(Shader shader, glm::mat4 model);
+	void attachDepthElement(Shader* shader);
 
 	~DirectionalLight();
 

@@ -16,7 +16,7 @@ public:
 
 	void writeBuffer() override;
 
-	void readBuffer(int unit) override;
+	void readBuffer(GLenum unit) override;
 
 	~DirectionalShadowMap();
 };

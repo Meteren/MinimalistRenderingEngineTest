@@ -8,6 +8,10 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
+uniform mat4 dLightTransform;
+
+out vec4 lightProjection;
+
 out vec4 vertex_color;
 out vec2 uv;
 out vec3 normalWS;
@@ -19,4 +23,6 @@ void main(){
 	uv = texcoords;
 	normalWS = mat3(transpose(inverse(model))) * normalOS;
 	fragWS = (model * vec4(position,1)).xyz;
+
+	lightProjection = dLightTransform * model * vec4(position,1);
 };

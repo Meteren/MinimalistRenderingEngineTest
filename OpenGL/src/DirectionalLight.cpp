@@ -1,6 +1,6 @@
 #include "DirectionalLight.h"
 
-DirectionalLight::DirectionalLight() : Light(), ortho(glm::mat4()), dLightTranfsorm(glm::mat4())
+DirectionalLight::DirectionalLight() : Light() //ortho(glm::mat4()), dLightTransform(glm::mat4())
 {
 
 }
@@ -11,9 +11,9 @@ DirectionalLight::DirectionalLight(float directionalLightIntensity, float aLight
 	this->direction = direction;
 
 	glm::mat4 view = glm::lookAt(-direction, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-	ortho = glm::ortho(-20.0f, 20.0f, -20.0f, 20.0f, 0.1f, 20.0f);
+	ortho = glm::ortho(-100.0f,100.0f, -100.0f, 100.0f, 0.1f, 1000.0f);
 
-	this->dLightTranfsorm = ortho * view;
+	this->dLightTransform = ortho * view;
 
 	shadowMap = new DirectionalShadowMap(shadowMapWidth, shadowMapHeight);
 
@@ -38,12 +38,13 @@ void DirectionalLight::useLight(Shader shader,int i)
 glm::mat4 DirectionalLight::calculateLightTransform()
 {
 	glm::mat4 view = glm::lookAt(-direction, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-	return ortho * view;
+	dLightTransform = ortho * view;
+	return dLightTransform;
 }
 
 glm::mat4 DirectionalLight::getLightTransform() const
 {
-	return dLightTranfsorm;
+	return dLightTransform;
 }
 
 void DirectionalLight::attachdShadowMap(Shader shader)
@@ -52,10 +53,9 @@ void DirectionalLight::attachdShadowMap(Shader shader)
 	glUniform1i(shader.getdShadowMapLoc(), 1);
 }
 
-void DirectionalLight::attachDepthElements(Shader shader, glm::mat4 model)
+void DirectionalLight::attachDepthElement(Shader* shader)
 {
-	glUniformMatrix4fv(shader.getModelLoc(),0,GL_FALSE,glm::value_ptr(model));
-	glUniformMatrix4fv(shader.getdLightTransformLoc(),0,GL_FALSE,glm::value_ptr(dLightTranfsorm));
+	glUniformMatrix4fv(shader->getdLightTransformLoc(), 1, GL_FALSE, glm::value_ptr(calculateLightTransform()));
 }
 
 DirectionalLight::~DirectionalLight()

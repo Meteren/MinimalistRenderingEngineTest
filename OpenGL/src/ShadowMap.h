@@ -18,7 +18,7 @@ public:
 
 	virtual void writeBuffer();
 
-	virtual void readBuffer(int unit);
+	virtual void readBuffer(GLenum unit);
 
 	~ShadowMap();
 

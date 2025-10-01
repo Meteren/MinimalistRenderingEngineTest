@@ -12,6 +12,7 @@ Shader::Shader()
     u_spotLightCount = 0;
     u_dLightTransform = 0;
     u_dShadowMap = 0;
+    u_camPos = 0;
     uniformDirectionalLight = {0};
     
     for (int i = 0; i < MAX_POINT_LIGHT_COUNT; i++) {
@@ -81,12 +82,15 @@ void Shader::createShaderProgram(const char* vShaderData, const char* fShaderDat
     projection_loc = glGetUniformLocation(program, "projection");
 
     u_pointLightCount = glGetUniformLocation(program, "pointLightCount");
-    printf("-- Point Light Count: %d -- ", u_pointLightCount);
 
     u_spotLightCount = glGetUniformLocation(program, "spotLightCount");
 
-    u_dLightTransform = glGetUniformLocation(program, "dLightTranform");
+    u_dLightTransform = glGetUniformLocation(program, "dLightTransform");
+    printf("Light transform: %i\n", u_dLightTransform);
     u_dShadowMap = glGetUniformLocation(program, "dShadowMap");
+    printf("Shadow map: %i\n", u_dShadowMap);
+
+    u_camPos = glGetUniformLocation(program, "camPos");
 
     uniformDirectionalLight.u_aColor = glGetUniformLocation(program, "directionalLight.base.aColor");
     uniformDirectionalLight.u_aIntensity = glGetUniformLocation(program, "directionalLight.base.aIntensity");
@@ -263,6 +267,11 @@ int Shader::getdShadowMapLoc() const
 int Shader::getdLightTransformLoc() const
 {
     return u_dLightTransform;
+}
+
+int Shader::getCamPosLoc() const
+{
+    return u_camPos;
 }
 
 void Shader::deleteProgram()

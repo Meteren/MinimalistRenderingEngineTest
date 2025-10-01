@@ -32,7 +32,17 @@ float Light::getAmbientLightIntensity()
 
 ShadowMap* Light::getShadowMap() const
 {
-	return this->shadowMap;
+	return shadowMap;
+}
+
+int Light::getShadowMapWidth() const
+{
+	return shadowMapWidth;
+}
+
+int Light::getShadowMapHeight() const
+{
+	return shadowMapHeight;
 }
 
 

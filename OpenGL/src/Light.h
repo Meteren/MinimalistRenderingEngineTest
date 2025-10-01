@@ -30,6 +30,9 @@ public:
 
 	ShadowMap* getShadowMap() const;
 
+	int getShadowMapWidth() const;
+	int getShadowMapHeight() const;
+
 	~Light();
 	
 };

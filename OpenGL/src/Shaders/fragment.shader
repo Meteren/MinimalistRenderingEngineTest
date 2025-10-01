@@ -1,16 +1,16 @@
 #version 330 core
 
-
 const int MAX_POINT_LIGHT_COUNT = 3;
 const int MAX_SPOT_LIGHT_COUNT = 3;
 
 out vec4 color;
-uniform vec4 u_color;
 in vec4 vertex_color;
 
 in vec2 uv;
 in vec3 normalWS;
 in vec3 fragWS;
+
+in vec4 lightProjection;
 
 uniform sampler2D mainTex;
 uniform sampler2D dShadowMap;
@@ -56,8 +56,22 @@ uniform PointLight pointLights[MAX_POINT_LIGHT_COUNT];
 uniform SpotLight spotLights[MAX_SPOT_LIGHT_COUNT];
 
 
+float CalculateDirectionalShadowFactor(){
 
-vec4 CalculatePhongLighting(Light base, vec3 direction){
+    vec3 ndc = lightProjection.xyz / lightProjection.w;
+    
+    vec3 rangedNDC =  (ndc * 0.5f) + 0.5f;
+
+    float closestDepth = texture(dShadowMap,rangedNDC.xy).r;
+
+    float shadowFactor = step(closestDepth,rangedNDC.z);
+
+    return shadowFactor;
+
+}
+
+
+vec4 CalculatePhongLighting(Light base, vec3 direction, float shadowFactor){
 
     float lightFactor = max(dot(normalize(normalWS), normalize(direction)),0.0f);
 
@@ -81,16 +95,16 @@ vec4 CalculatePhongLighting(Light base, vec3 direction){
 
     }
 
-    return mainLightWithColor + ambientLight + specColor;
+    return ambientLight + ( (1- shadowFactor) * (mainLightWithColor  + specColor) );
 
 }
 
 vec4 CalculateDirectionalLight(DirectionalLight light){
-    vec4 finalLighting = CalculatePhongLighting(light.base,light.direction);
+    vec4 finalLighting = CalculatePhongLighting(light.base,light.direction,CalculateDirectionalShadowFactor());
     return finalLighting;
 }
 
-vec4 CalculatePointLight(PointLight pointLight){
+vec4 CalculatePointLight(PointLight pointLight,float shadowFactor){
     vec4 color = vec4(0,0,0,0);
 
     vec3 direction = fragWS - pointLight.position;
@@ -99,7 +113,7 @@ vec4 CalculatePointLight(PointLight pointLight){
 
     direction = normalize(direction);
 
-    color += CalculatePhongLighting(pointLight.base,direction);
+    color += CalculatePhongLighting(pointLight.base,direction,shadowFactor);
 
     float attenuation = pointLight.exponent * distance * distance + pointLight.linear * distance + pointLight.constant;
         
@@ -110,7 +124,7 @@ vec4 CalculatePointLight(PointLight pointLight){
 
 vec4 CalculateSpotLight(SpotLight spotLight){
     vec4 color = vec4(0,0,0,0);
-    color += CalculatePointLight(spotLight.pointLight);
+    color += CalculatePointLight(spotLight.pointLight,0);
 
     vec3 fragDir = normalize(fragWS - spotLight.pointLight.position);  
 
@@ -131,7 +145,7 @@ vec4 CalculatePointLights(){
 
     for(int i = 0; i < pointLightCount; i++){
 
-        finalLighting += CalculatePointLight(pointLights[i]);
+        finalLighting += CalculatePointLight(pointLights[i],0);
     }
 
     return finalLighting;
@@ -160,6 +174,10 @@ void main(){
 
     vec4 mainColor = texture(mainTex,uv);
 
+    //vec4 c = texture(dShadowMap,uv);
+
     color = mainColor * overallLightCol;
-    //color = mainColor;
+
+    //color = c;
+    //color = c;
 };

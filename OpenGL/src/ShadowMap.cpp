@@ -24,7 +24,7 @@ void ShadowMap::writeBuffer()
 	return;
 }
 
-void ShadowMap::readBuffer(int unit)
+void ShadowMap::readBuffer(GLenum unit)
 {
 	return;
 }

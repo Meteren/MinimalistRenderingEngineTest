@@ -2,12 +2,12 @@
 
 layout(location = 0) in vec3 positionOS;
 
-uniform mat4 dLightTranform;
+uniform mat4 dLightTransform;
 uniform mat4 model;
 
 
 void main(){
 
-	gl_Position = dLightTranform * model * vec4(positionOS,1); 
+	gl_Position = dLightTransform * model * vec4(positionOS,1); 
 
 }
