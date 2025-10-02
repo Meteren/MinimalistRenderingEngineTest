@@ -14,21 +14,6 @@ ShadowMap::ShadowMap(int WIDTH, int HEIGHT)
 	this->HEIGHT = HEIGHT;
 }
 
-bool ShadowMap::init()
-{
-	return false;
-}
-
-void ShadowMap::writeBuffer()
-{
-	return;
-}
-
-void ShadowMap::readBuffer(GLenum unit)
-{
-	return;
-}
-
 ShadowMap::~ShadowMap()
 {
 	if(FBO)

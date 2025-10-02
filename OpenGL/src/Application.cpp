@@ -127,7 +127,7 @@ void RenderObjects(Shader* shader) {
 
     meshes[1]->render();
 
-    glUniformMatrix4fv(shader->getModelLoc(), 1, GL_FALSE, glm::value_ptr(ApplyTransform(0, glm::vec3(-4, -1, 5), glm::vec3(0.003f, 0.003f, 0.003f))));
+    glUniformMatrix4fv(shader->getModelLoc(), 1, GL_FALSE, glm::value_ptr(ApplyTransform(0, glm::vec3(-11, 3, 15), glm::vec3(0.009f, 0.009f, 0.009f))));
 
     models[1]->renderModel();
 

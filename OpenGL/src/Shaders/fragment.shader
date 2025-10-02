@@ -62,9 +62,28 @@ float CalculateDirectionalShadowFactor(){
     
     vec3 rangedNDC =  (ndc * 0.5f) + 0.5f;
 
-    float closestDepth = texture(dShadowMap,rangedNDC.xy).r;
+    float bias = max((1 - dot(normalize(normalWS),normalize(directionalLight.direction))) * 0.005,0.0005);
 
-    float shadowFactor = step(closestDepth,rangedNDC.z);
+    vec2 dV = 1.0f / textureSize(dShadowMap,0);
+    
+    float shadowFactor = 0;
+
+    for(int i = -1; i <= 1; i++ ){
+
+        for(int j = -1; j <= 1; j++){
+            float closestDepth = texture(dShadowMap, rangedNDC.xy + vec2(dV.x * i, dV.y)).r;
+            float sF = step(closestDepth, rangedNDC.z - bias);
+
+            shadowFactor+=sF;
+        }
+
+    }
+
+    shadowFactor/=9;
+
+    if(rangedNDC.z > 1.0){
+        shadowFactor = 0.0f;
+    }
 
     return shadowFactor;
 
@@ -95,7 +114,7 @@ vec4 CalculatePhongLighting(Light base, vec3 direction, float shadowFactor){
 
     }
 
-    return ambientLight + ( (1- shadowFactor) * (mainLightWithColor  + specColor) );
+    return ambientLight + ( (1 - shadowFactor) * (mainLightWithColor  + specColor) );
 
 }
 

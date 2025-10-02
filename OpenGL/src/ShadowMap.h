@@ -14,11 +14,11 @@ public:
 
 	ShadowMap(int WIDTH, int HEIGHT);
 
-	virtual bool init();
+	virtual bool init() = 0;
 
-	virtual void writeBuffer();
+	virtual void writeBuffer() = 0;
 
-	virtual void readBuffer(GLenum unit);
+	virtual void readBuffer(GLenum unit) = 0;
 
 	~ShadowMap();
 
