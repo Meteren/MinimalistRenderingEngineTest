@@ -20,8 +20,8 @@ DirectionalLight::DirectionalLight(float directionalLightIntensity, float aLight
 	if (shadowMap->init()){}
 	else
 	{
-		delete shadowMap;
-		shadowMap = nullptr;
+		printf("Directional shadow mapping failure!\n");
+		
 	}
 
 }
@@ -49,8 +49,8 @@ glm::mat4 DirectionalLight::getLightTransform() const
 
 void DirectionalLight::attachdShadowMap(Shader shader)
 {
-	shadowMap->readBuffer(GL_TEXTURE1);
-	glUniform1i(shader.getdShadowMapLoc(), 1);
+	shadowMap->readBuffer(GL_TEXTURE2);
+	glUniform1i(shader.getdShadowMapLoc(), 2);
 }
 
 void DirectionalLight::attachDepthElement(Shader* shader)
@@ -60,4 +60,5 @@ void DirectionalLight::attachDepthElement(Shader* shader)
 
 DirectionalLight::~DirectionalLight()
 {
+
 }

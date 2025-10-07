@@ -21,6 +21,9 @@ private:
 	int u_dLightTransform;
 	int u_dShadowMap;
 	int u_camPos;
+	int u_farPlane;
+	int u_pointLightPos;
+	int u_mainTex;
 
 public:
 
@@ -56,11 +59,20 @@ public:
 		int u_cutOff;
 	} uniformSpotLights[MAX_SPOT_LIGHT_COUNT];
 
+	int u_odLightTransformMatrixLocs[6];
+
+	struct {
+		int u_farPlane;
+		int u_oDShadowMap;
+	} u_oDShadowMap[MAX_POINT_LIGHT_COUNT + MAX_SPOT_LIGHT_COUNT];
+
 	Shader();
 
 	unsigned int compileShader(unsigned int type, const char* data);
 
 	void createShaderProgram(const char* vShaderData, const char* fShaderData);
+
+	void createShaderProgram(const char* vShaderData, const char* gShaderData, const char* fShaderData);
 
 	void useProgram();
 
@@ -78,6 +90,8 @@ public:
 	int getdShadowMapLoc() const;
 	int getdLightTransformLoc() const;
 	int getCamPosLoc() const;
+	int getPointLightPosLoc() const;
+	int getMainTexLoc() const;
 
 
 	void deleteProgram();

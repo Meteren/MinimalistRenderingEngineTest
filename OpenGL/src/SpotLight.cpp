@@ -5,8 +5,8 @@ SpotLight::SpotLight() : PointLight(), cutOff(0), procCutOff(0), direction(glm::
 
 
 SpotLight::SpotLight(float mainLightIntensity, float aLightIntensity, glm::vec3 ambientColor, 
-	float exponent, float linear, float constant, glm::vec3 position, float cutOff, glm::vec3 direction) 
-	: PointLight(mainLightIntensity,aLightIntensity,ambientColor,exponent,linear,constant,position,1024,1024)
+	float exponent, float linear, float constant, glm::vec3 position, float cutOff, glm::vec3 direction,int shadowMapWidth, int shadowMapHeight,float farPlane) 
+	: PointLight(mainLightIntensity,aLightIntensity,ambientColor,exponent,linear,constant,position,shadowMapWidth,shadowMapHeight,farPlane)
 {
 	this->cutOff = cutOff;
 	this->direction = direction;
@@ -72,4 +72,5 @@ bool SpotLight::getSpotLightStatus() const
 
 SpotLight::~SpotLight()
 {
+	
 }

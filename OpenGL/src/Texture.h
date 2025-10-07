@@ -4,6 +4,7 @@
 #include <GL\glew.h>
 
 #include "stb_image.h"
+#include "Shader.h"
 
 class Texture
 {
@@ -21,7 +22,7 @@ public:
 	bool loadTexture();
 	bool loadTextureA();
 
-	void useTexture();
+	void useTexture(Shader& shader, GLenum unit);
 
 	void bindTexture() const;
 	void unbindTexture() const;

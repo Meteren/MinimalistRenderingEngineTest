@@ -47,11 +47,10 @@ int Light::getShadowMapHeight() const
 
 
 Light::~Light()
-{
+{	
 	if (shadowMap) {
 		delete shadowMap;
 		shadowMap = nullptr;
 	}
-		
 }
 

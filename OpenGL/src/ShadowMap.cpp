@@ -14,6 +14,7 @@ ShadowMap::ShadowMap(int WIDTH, int HEIGHT)
 	this->HEIGHT = HEIGHT;
 }
 
+
 ShadowMap::~ShadowMap()
 {
 	if(FBO)

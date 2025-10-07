@@ -118,11 +118,11 @@ void Model::loadMaterial(const aiScene* scene)
 	}
 }
 
-void Model::renderModel()
+void Model::renderModel(Shader shader)
 {
 	for (size_t i = 0; i < meshes.size(); i++) {
 		unsigned int materialIndex = meshToTex[i];
-		textures[materialIndex]->useTexture();
+		textures[materialIndex]->useTexture(shader,GL_TEXTURE1);
 		meshes[i]->render();
 	}
 }

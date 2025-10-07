@@ -6,16 +6,40 @@ PointLight::PointLight()
 	linear = 0;
 	constant = 1;
 	position = glm::vec3(0, 0, 0);
+	farPlane = 0;
+	lightPerspective = glm::mat4(1.0f);
+	
 }
 
 PointLight::PointLight(float mainLightIntensity, float aLightIntensity, glm::vec3 ambientColor, float exponent, 
-	float linear, float constant, glm::vec3 position,int shadowMapWidth,int shadowMapHeight)
+	float linear, float constant, glm::vec3 position,int shadowMapWidth,int shadowMapHeight,float farPlane)
 	: Light(mainLightIntensity,aLightIntensity,ambientColor,shadowMapWidth,shadowMapHeight)
 {
 	this->exponent = exponent;
 	this->linear = linear;
 	this->constant = constant;
 	this->position = position;
+
+	this->farPlane = farPlane;
+
+	lightPerspective = glm::perspective(glm::radians(90.0f), (float)shadowMapWidth / (float)shadowMapHeight, 0.01f, farPlane);
+
+	lightTransforms.push_back(lightPerspective * glm::lookAt(this->position, this->position + glm::vec3(1, 0, 0), glm::vec3(0, -1, 0)));
+	lightTransforms.push_back(lightPerspective * glm::lookAt(this->position, this->position + glm::vec3(-1, 0, 0), glm::vec3(0, -1, 0)));
+	lightTransforms.push_back(lightPerspective * glm::lookAt(this->position, this->position + glm::vec3(0, 1, 0), glm::vec3(0, 0, 1)));
+	lightTransforms.push_back(lightPerspective * glm::lookAt(this->position, this->position + glm::vec3(0, -1, 0), glm::vec3(0, 0, -1)));
+	lightTransforms.push_back(lightPerspective * glm::lookAt(this->position, this->position + glm::vec3(0, 0, 1), glm::vec3(0, -1, 0)));
+	lightTransforms.push_back(lightPerspective * glm::lookAt(this->position, this->position + glm::vec3(1, 0, -1), glm::vec3(0, -1, 0)));
+
+	shadowMap = new OmniDirectionalShadowMap(shadowMapWidth, shadowMapHeight);
+
+	if (shadowMap->init()){}
+	else {
+		printf("Omnidirectional shadow mapping failure!\n");
+		delete shadowMap;
+		shadowMap = nullptr;
+	}
+
 }
 
 void PointLight::useLight(Shader shader, int i)
@@ -28,6 +52,20 @@ void PointLight::useLight(Shader shader, int i)
 	glUniform1f(shader.uniformPointLights[i].u_linear, linear);
 	glUniform1f(shader.uniformPointLights[i].u_constant, constant);
 
+}
+
+void PointLight::attachShadowMap(Shader shader, GLenum unit, int unitValue, int lightIndex)
+{
+	shadowMap->readBuffer(unit);
+	glUniform1i(shader.u_oDShadowMap[lightIndex].u_oDShadowMap, unitValue);
+	glUniform1i(shader.u_oDShadowMap[lightIndex].u_farPlane, farPlane);
+}
+
+void PointLight::attachLightTransforms(Shader shader)
+{
+	for (int i = 0; i < lightTransforms.size(); i++) {
+		glUniformMatrix4fv(shader.u_odLightTransformMatrixLocs[i],1, GL_FALSE,glm::value_ptr(lightTransforms[i]));
+	}
 }
 
 PointLight::~PointLight()

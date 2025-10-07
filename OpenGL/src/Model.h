@@ -30,7 +30,7 @@ public:
 	~Model();
 
 	void loadModel();
-	void renderModel();
+	void renderModel(Shader shader);
 	void clearModel();
 };
 

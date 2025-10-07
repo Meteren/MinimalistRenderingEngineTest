@@ -47,7 +47,9 @@ float lastTime = 0;
 
 Shader mainShader = Shader();
 
-Shader depthShader = Shader();
+Shader dDepthShader = Shader();
+
+Shader oDepthShader = Shader();
 
 
 static float ColorVal() {
@@ -129,11 +131,11 @@ void RenderObjects(Shader* shader) {
 
     glUniformMatrix4fv(shader->getModelLoc(), 1, GL_FALSE, glm::value_ptr(ApplyTransform(0, glm::vec3(-11, 3, 15), glm::vec3(0.009f, 0.009f, 0.009f))));
 
-    models[1]->renderModel();
+    models[1]->renderModel(*shader);
 
     glUniformMatrix4fv(shader->getModelLoc(), 1, GL_FALSE, glm::value_ptr(ApplyTransform(0, glm::vec3(40, -2, 0), glm::vec3(1, 1, 1))));
 
-    models[0]->renderModel();
+    models[0]->renderModel(*shader);
 }
 
 void dShadowMapRenderPass(DirectionalLight* light) {
@@ -156,7 +158,7 @@ void dShadowMapRenderPass(DirectionalLight* light) {
 }
 
 void mainRenderPass(glm::mat4 projection, DirectionalLight* directionalLight, 
-    PointLight* pointLights, SpotLight* spotLights, Camera &camera, Window* window) {
+    PointLight** pointLights, SpotLight** spotLights, Camera &camera, Window* window) {
 
     float currTime = (float)glfwGetTime();
 
@@ -169,7 +171,7 @@ void mainRenderPass(glm::mat4 projection, DirectionalLight* directionalLight,
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    textures[0]->useTexture();
+    textures[0]->useTexture(*shaders[0], GL_TEXTURE1);
 
     glUniform1i(shaders[0]->getPointLightCountLoc(), shaders[0]->pointLightCount);
     glUniform1i(shaders[0]->getSpotLightCountLoc(), shaders[0]->spotLightCount);
@@ -181,19 +183,19 @@ void mainRenderPass(glm::mat4 projection, DirectionalLight* directionalLight,
     directionalLight->useLight(*shaders[0], 0);
  
     for (int i = 0; i < shaders[0]->pointLightCount; i++) {
-        pointLights[i].useLight(*shaders[0], i);
+        pointLights[i]->useLight(*shaders[0], i);
     }
 
-    spotLights[1].setCondition(window);
+    spotLights[1]->setCondition(window);
 
-    spotLights[1].setPosition(camera.getPos()
+    spotLights[1]->setPosition(camera.getPos()
         + glm::vec3(camera.getDir().x * 0.5, camera.getDir().y * 0.5, camera.getDir().z * 0.5)
         + glm::vec3(0, -0.2f, 0));
-    spotLights[1].setDirection(camera.getDir());
+    spotLights[1]->setDirection(camera.getDir());
 
     //spot light loop
     for (int i = 0; i < mainShader.spotLightCount; i++) {
-        spotLights[i].useLight(mainShader, i);
+        spotLights[i]->useLight(mainShader, i);
     }
     //----
     camera.TransformCamera(window->getKeys(), deltaTime);
@@ -215,7 +217,8 @@ void mainRenderPass(glm::mat4 projection, DirectionalLight* directionalLight,
 int main(void)
 {
     shaders.push_back(&mainShader);
-    shaders.push_back(&depthShader);
+    shaders.push_back(&dDepthShader);
+    shaders.push_back(&oDepthShader);
 
     Window* window = new Window();
 
@@ -232,76 +235,57 @@ int main(void)
 
     materials.push_back(&material);
 
-    PointLight pointLights[MAX_POINT_LIGHT_COUNT];
+    PointLight* pointLights[MAX_POINT_LIGHT_COUNT];
 
-    SpotLight spotLights[MAX_SPOT_LIGHT_COUNT];
+    SpotLight* spotLights[MAX_SPOT_LIGHT_COUNT];
 
     //point light creating
-    PointLight lightOne = PointLight(2.0f, 0.01f, glm::vec3(1, 0, 0), 0.01f, 0.03f, 1.0f, glm::vec3(-4.0f, -1.0f, 0.0f), 1024, 1024);
+    PointLight lightOne = PointLight(2.0f, 0.01f, glm::vec3(1, 0, 0), 0.01f, 0.03f, 1.0f, glm::vec3(-4.0f, -1.0f, 0.0f), 1024, 1024,100);
     mainShader.pointLightCount++;
-    PointLight lightTwo = PointLight(2.0f, 0.01f, glm::vec3(0, 0, 1), 0.01f, 0.03f, 1.0f, glm::vec3(4.0f, -1.0f, 0.0f), 1024, 1024);
+    PointLight lightTwo = PointLight(2.0f, 0.01f, glm::vec3(0, 0, 1), 0.01f, 0.03f, 1.0f, glm::vec3(4.0f, -1.0f, 0.0f), 1024, 1024,100);
     mainShader.pointLightCount++;
 
-    pointLights[0] = lightOne;
-    pointLights[1] = lightTwo;
+    pointLights[0] = &lightOne;
+    pointLights[1] = &lightTwo;
 
     //spot light creation
 
     SpotLight spotLightOne =
-        SpotLight(2.0f, 0.01f, glm::vec3(1, 1, 1), 0.01f, 0.03f, 1.0f, glm::vec3(0, -1, 0), 60.0f, glm::vec3(0, -2, 0));
+        SpotLight(2.0f, 0.01f, glm::vec3(1, 1, 1), 0.01f, 0.03f, 1.0f, glm::vec3(0, -1, 0), 60.0f, glm::vec3(0, -2, 0),1024,1024,100);
     shaders[0]->spotLightCount++;
 
     SpotLight spotLightTwo =
-        SpotLight(3.0f, 0.01f, glm::vec3(1, 0, 1), 0.01f, 0.03f, 1.0f, glm::vec3(5, -1, 0), 30.0f, glm::vec3(1, 0, 0));
+        SpotLight(3.0f, 0.01f, glm::vec3(1, 0, 1), 0.01f, 0.03f, 1.0f, glm::vec3(5, -1, 0), 30.0f, glm::vec3(1, 0, 0), 1024, 1024, 100);
     shaders[0]->spotLightCount++;
 
     SpotLight spotLightThree =
-        SpotLight(3.0f, 0.01f, glm::vec3(0, 1, 0), 0.01f, 0.03f, 1.0f, glm::vec3(0, 0, 9), 60.0f, glm::vec3(0, -1, -10));
+        SpotLight(3.0f, 0.01f, glm::vec3(0, 1, 0), 0.01f, 0.03f, 1.0f, glm::vec3(0, 0, 9), 60.0f, glm::vec3(0, -1, -10), 1024, 1024, 100);
     shaders[0]->spotLightCount++;
 
-    spotLights[0] = spotLightOne;
-    spotLights[1] = spotLightTwo;
-    spotLights[2] = spotLightThree;
+    spotLights[0] = &spotLightOne;
+    spotLights[1] = &spotLightTwo;
+    spotLights[2] = &spotLightThree;
 
     glViewport(0, 0, window->fbWidth, window->fbHeight);
 
-    /*const char* vShaderData = "#version 330 core\n"
-        "layout (location = 0) in vec3 position;\n"
-        "uniform mat4 model;\n"
-        "uniform mat4 view;\n"
-        "uniform mat4 projection;\n"
-        "out vec4 vertex_color;\n"
-        "void main(){\n"
-        "gl_Position =  projection * view * model * vec4(position,1);\n"
-        "vertex_color = vec4(clamp(position,0.0f,1.0f),1);\n"
-        "}";*/
 
+    //this section will be corrected later to make file paths work in every enviorenment
+    //main shader
     const char* vShaderData = Shader::readShader("C:/Users/Meate/source/repos/OpenGL/OpenGL/src/Shaders/vertex.shader");
-
-    /*const char* fShaderData = "#version 330 core\n"
-        "out vec4 color;\n"
-        "uniform vec4 u_color;\n"
-        "in vec4 vertex_color;\n"
-        "void main(){\n"
-        "color = vertex_color;\n"
-        "}";*/
-
     const char* fShaderData = Shader::readShader("C:/Users/Meate/source/repos/OpenGL/OpenGL/src/Shaders/fragment.shader");
+    //--
 
     //depth shader locations for directional light
-    const char* depthShaderVData = Shader::readShader("C:/Users/Meate/source/repos/OpenGL/OpenGL/src/Shaders/directionalSMv.shader");
-    const char* depthShaderFData = Shader::readShader("C:/Users/Meate/source/repos/OpenGL/OpenGL/src/Shaders/directionalSMf.shader");
+    const char* dDepthShaderVData = Shader::readShader("C:/Users/Meate/source/repos/OpenGL/OpenGL/src/Shaders/directionalSMv.shader");
+    const char* dDepthShaderFData = Shader::readShader("C:/Users/Meate/source/repos/OpenGL/OpenGL/src/Shaders/directionalSMf.shader");
     //---
 
-    glEnable(GL_DEPTH_TEST);
+    //omnidirectional depth shader locations for point and spot light
+    const char* oDirectionalDepthShaderVData = Shader::readShader("C:/Users/Meate/source/repos/OpenGL/OpenGL/src/Shaders/omniDirectionalSMv.shader");
+    const char* oDirectionalDepthShaderGData = Shader::readShader("C:/Users/Meate/source/repos/OpenGL/OpenGL/src/Shaders/omniDirectionalSMg.shader");
+    const char* oDirectionalDepthShaderFata = Shader::readShader("C:/Users/Meate/source/repos/OpenGL/OpenGL/src/Shaders/omniDirectionalSMf.shader");
 
-    /*float vertices[] =
-    {
-        0.0f, 1.0f, 0.0f,   0.5f,1.0f,   0.0f,1.0f,0.0f,//0
-        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,  -1.0f,0.0f,0.0f,//1
-        1.0f, -1.0f, 0.0f,  1.0f, 0.0f,  1.0f,0.0f,0.0f,//2
-        0.0f,-1.0f,1.0f,    0.5f,0.0f,   0.0f,0.0f,1.0f//3
-    };*/
+    glEnable(GL_DEPTH_TEST);
 
     float vertices[] =
     {
@@ -333,20 +317,20 @@ int main(void)
 
     setNormals(vertices, 8, 4, 5, 3, indices);
 
-    /*for (int i = 0; i < 12; i += 3) {
-        printf("%f ** ", vertices[i + 5]);
-        printf("%f ** ", vertices[i + 6]);
-        printf("%f\n", vertices[i + 7]);
-    }*/
-
     VertexBuffer vb(vertices, indices, sizeof(vertices) / sizeof(float), sizeof(indices) / sizeof(unsigned int));
     meshes.push_back(&vb);
 
     mainShader.createShaderProgram(vShaderData, fShaderData);
-    depthShader.createShaderProgram(depthShaderVData, depthShaderFData);
+    dDepthShader.createShaderProgram(dDepthShaderVData, dDepthShaderFData);
+    oDepthShader.createShaderProgram(oDirectionalDepthShaderVData, oDirectionalDepthShaderGData, oDirectionalDepthShaderFata);
 
     delete[] vShaderData;
     delete[] fShaderData;
+    delete[] dDepthShaderVData;
+    delete[] dDepthShaderFData;
+    delete[] oDirectionalDepthShaderVData;
+    delete[] oDirectionalDepthShaderGData;
+    delete[] oDirectionalDepthShaderFata;
 
     glm::mat4 projection(1.0f);
 

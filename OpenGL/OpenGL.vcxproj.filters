@@ -57,6 +57,9 @@
     <ClCompile Include="src\DirectionalShadowMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\OmniDirectionalShadowMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\VertexBuffer.h">
@@ -104,12 +107,18 @@
     <ClInclude Include="src\DirectionalShadowMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\OmniDirectionalShadowMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\Shaders\vertex.shader" />
     <None Include="src\Shaders\fragment.shader" />
     <None Include="src\Shaders\directionalSMf.shader" />
     <None Include="src\Shaders\directionalSMv.shader" />
+    <None Include="src\Shaders\omniDirectionalSMf.shader" />
+    <None Include="src\Shaders\omniDirectionalSMg.shader" />
+    <None Include="src\Shaders\omniDirectionalSMv.shader" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="src\Textures\BIBBUMP.jpg">

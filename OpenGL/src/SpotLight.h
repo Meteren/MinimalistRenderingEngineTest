@@ -17,7 +17,7 @@ public:
 	SpotLight();
 
 	SpotLight(float mainLightIntensity, float aLightIntensity, glm::vec3 ambientColor, float exponent, 
-		float linear, float constant, glm::vec3 position,float cutOff, glm::vec3 direction);
+		float linear, float constant, glm::vec3 position,float cutOff, glm::vec3 direction,int shadowMapWidth,int shadowMapHeight,float farPlane);
 
 	void useLight(Shader shader, int i) override;
 

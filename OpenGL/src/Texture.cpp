@@ -13,7 +13,10 @@ Texture::Texture()
 
 Texture::Texture(const char* path)
 {
-
+	width = 0;
+	height = 0;
+	tex_ID = 0;
+	bitDepth = 0;
 	this->path = path;
 }
 
@@ -69,10 +72,11 @@ bool Texture::loadTextureA()
 	return true;
 }
 
-void Texture::useTexture()
+void Texture::useTexture(Shader& shader,GLenum unit)
 {
-	glActiveTexture(GL_TEXTURE0);
+	glActiveTexture(unit);
 	bindTexture();
+	glUniform1i(shader.getMainTexLoc(), 1);
 }
 
 void Texture::bindTexture() const

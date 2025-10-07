@@ -48,6 +48,11 @@ struct SpotLight{
     float cutOff;
 };
 
+struct OmniDirectionalShadowMap{
+    samplerCube shadowMap;
+    float farPlane;
+};
+
 uniform int pointLightCount;
 uniform int spotLightCount; //dont forget to send from cpu side as uniform value
 uniform Material material;
@@ -55,6 +60,7 @@ uniform DirectionalLight directionalLight;
 uniform PointLight pointLights[MAX_POINT_LIGHT_COUNT];
 uniform SpotLight spotLights[MAX_SPOT_LIGHT_COUNT];
 
+uniform OmniDirectionalShadowMap oDShadowMap[MAX_POINT_LIGHT_COUNT + MAX_SPOT_LIGHT_COUNT];
 
 float CalculateDirectionalShadowFactor(){
 
@@ -62,7 +68,7 @@ float CalculateDirectionalShadowFactor(){
     
     vec3 rangedNDC =  (ndc * 0.5f) + 0.5f;
 
-    float bias = max((1 - dot(normalize(normalWS),normalize(directionalLight.direction))) * 0.005,0.0005);
+    float bias = max((1 - dot(normalize(normalWS),normalize(directionalLight.direction))) * 0.00005,0.00005);
 
     vec2 dV = 1.0f / textureSize(dShadowMap,0);
     
