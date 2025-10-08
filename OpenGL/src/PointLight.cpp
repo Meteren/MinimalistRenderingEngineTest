@@ -24,13 +24,6 @@ PointLight::PointLight(float mainLightIntensity, float aLightIntensity, glm::vec
 
 	lightPerspective = glm::perspective(glm::radians(90.0f), (float)shadowMapWidth / (float)shadowMapHeight, 0.01f, farPlane);
 
-	lightTransforms.push_back(lightPerspective * glm::lookAt(this->position, this->position + glm::vec3(1, 0, 0), glm::vec3(0, -1, 0)));
-	lightTransforms.push_back(lightPerspective * glm::lookAt(this->position, this->position + glm::vec3(-1, 0, 0), glm::vec3(0, -1, 0)));
-	lightTransforms.push_back(lightPerspective * glm::lookAt(this->position, this->position + glm::vec3(0, 1, 0), glm::vec3(0, 0, 1)));
-	lightTransforms.push_back(lightPerspective * glm::lookAt(this->position, this->position + glm::vec3(0, -1, 0), glm::vec3(0, 0, -1)));
-	lightTransforms.push_back(lightPerspective * glm::lookAt(this->position, this->position + glm::vec3(0, 0, 1), glm::vec3(0, -1, 0)));
-	lightTransforms.push_back(lightPerspective * glm::lookAt(this->position, this->position + glm::vec3(1, 0, -1), glm::vec3(0, -1, 0)));
-
 	shadowMap = new OmniDirectionalShadowMap(shadowMapWidth, shadowMapHeight);
 
 	if (shadowMap->init()){}
@@ -54,18 +47,42 @@ void PointLight::useLight(Shader shader, int i)
 
 }
 
-void PointLight::attachShadowMap(Shader shader, GLenum unit, int unitValue, int lightIndex)
+void PointLight::attachShadowMap(Shader& shader, unsigned int unit, unsigned int unitValue, unsigned int lightIndex)
 {
-	shadowMap->readBuffer(unit);
+	shadowMap->readBuffer(GL_TEXTURE0 + unit + lightIndex);
 	glUniform1i(shader.u_oDShadowMap[lightIndex].u_oDShadowMap, unitValue);
-	glUniform1i(shader.u_oDShadowMap[lightIndex].u_farPlane, farPlane);
+	glUniform1f(shader.u_oDShadowMap[lightIndex].u_farPlane, farPlane);
+
 }
 
-void PointLight::attachLightTransforms(Shader shader)
+void PointLight::attachLightTransforms(Shader& shader)
 {
+	std::vector<glm::mat4> lightTransforms = calculateLightTransforms();
 	for (int i = 0; i < lightTransforms.size(); i++) {
 		glUniformMatrix4fv(shader.u_odLightTransformMatrixLocs[i],1, GL_FALSE,glm::value_ptr(lightTransforms[i]));
 	}
+}
+
+void PointLight::attachLightPosition(Shader& shader)
+{
+	glUniform3f(shader.getPointLightPosLoc(), position.x, position.y, position.z);
+}
+
+void PointLight::attachFarPlane(Shader& shader)
+{
+	glUniform1f(shader.getFarPlaneLoc(), farPlane);
+}
+
+std::vector<glm::mat4> PointLight::calculateLightTransforms()
+{
+	std::vector<glm::mat4> lightTransforms;
+	lightTransforms.push_back(lightPerspective * glm::lookAt(position, position + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
+	lightTransforms.push_back(lightPerspective * glm::lookAt(position, position + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
+	lightTransforms.push_back(lightPerspective * glm::lookAt(position, position + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)));
+	lightTransforms.push_back(lightPerspective * glm::lookAt(position, position + glm::vec3(0.0, -1.0, 0.0), glm::vec3(0.0, 0.0, -1.0)));
+	lightTransforms.push_back(lightPerspective * glm::lookAt(position, position + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, -1.0, 0.0)));
+	lightTransforms.push_back(lightPerspective * glm::lookAt(position, position + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0)));
+	return lightTransforms;
 }
 
 PointLight::~PointLight()

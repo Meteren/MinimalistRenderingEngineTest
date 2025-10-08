@@ -24,7 +24,7 @@ public:
 
 	glm::mat4 getLightTransform() const;
 
-	void attachdShadowMap(Shader shader);
+	void attachdShadowMap(Shader& shader);
 
 	void attachDepthElement(Shader* shader);
 

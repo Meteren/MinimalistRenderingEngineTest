@@ -92,6 +92,7 @@ public:
 	int getCamPosLoc() const;
 	int getPointLightPosLoc() const;
 	int getMainTexLoc() const;
+	int getFarPlaneLoc() const;
 
 
 	void deleteProgram();

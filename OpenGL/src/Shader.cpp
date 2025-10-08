@@ -81,7 +81,7 @@ void Shader::createShaderProgram(const char* vShaderData, const char* fShaderDat
         return;
     }
 
-    validateProgram();
+    //validateProgram();
 
     model_loc = glGetUniformLocation(program, "model");
     view_loc = glGetUniformLocation(program, "view");
@@ -192,9 +192,11 @@ void Shader::createShaderProgram(const char* vShaderData, const char* fShaderDat
         char buffer[100] = { '\0' };
         snprintf(buffer, sizeof(buffer), "oDShadowMap[%i].shadowMap", i);
         u_oDShadowMap[i].u_oDShadowMap = glGetUniformLocation(program, buffer);
+        printf("OD Shadow map loc of %i: %i\n", i, u_oDShadowMap[i].u_oDShadowMap);
 
         snprintf(buffer, sizeof(buffer), "oDShadowMap[%i].farPlane", i);
         u_oDShadowMap[i].u_farPlane = glGetUniformLocation(program, buffer);
+        printf("OD far plane loc of %i: %i\n", i, u_oDShadowMap[i].u_farPlane);
 
     }
 
@@ -231,7 +233,7 @@ void Shader::createShaderProgram(const char* vShaderData, const char* gShaderDat
         return;
     }
 
-    validateProgram();
+    //validateProgram();
 
     model_loc = glGetUniformLocation(program, "model");
     view_loc = glGetUniformLocation(program, "view");
@@ -254,7 +256,9 @@ void Shader::createShaderProgram(const char* vShaderData, const char* gShaderDat
     uniformDirectionalLight.u_direction = glGetUniformLocation(program, "directionalLight.direction");
 
     u_farPlane = glGetUniformLocation(program, "farPlane");
+    printf("Far Plane for geometry shader stage: %i\n", u_farPlane);
     u_pointLightPos = glGetUniformLocation(program, "lightPos");
+    printf("Point light pos for geometry shader: %i\n", u_pointLightPos);
 
     for (int i = 0; i < MAX_POINT_LIGHT_COUNT; i++) {
 
@@ -340,6 +344,7 @@ void Shader::createShaderProgram(const char* vShaderData, const char* gShaderDat
         char buffer[100] = { '\0' };
         snprintf(buffer, sizeof(buffer), "odLightTransformMatrix[%i]", i);
         u_odLightTransformMatrixLocs[i] = glGetUniformLocation(program, buffer);
+        printf("ODLight transform loc of %i: %i\n",i, u_odLightTransformMatrixLocs[i]);
     }
 
 }
@@ -386,13 +391,14 @@ void Shader::validateProgram()
 {
     char errorLog[512];
 
-    int status;
+    GLint status;
 
+    glValidateProgram(program);
     glGetProgramiv(program, GL_VALIDATE_STATUS, &status);
 
     if (!status) {
         glGetProgramInfoLog(program, 512, NULL, errorLog);
-        printf("%s", errorLog);
+        printf("Error: %s", errorLog);
     }
     else {
         printf("Validation succeeded.\n");
@@ -448,6 +454,11 @@ int Shader::getPointLightPosLoc() const
 int Shader::getMainTexLoc() const
 {
     return u_mainTex;
+}
+
+int Shader::getFarPlaneLoc() const
+{
+    return u_farPlane;
 }
 
 void Shader::deleteProgram()

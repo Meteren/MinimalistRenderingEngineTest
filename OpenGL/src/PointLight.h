@@ -12,7 +12,6 @@ protected:
 	float farPlane;
 
 	glm::vec3 position;
-	std::vector<glm::mat4> lightTransforms;
 	glm::mat4 lightPerspective;
 
 public:
@@ -22,9 +21,15 @@ public:
 
 	void useLight(Shader shader, int i) override;
 
-	void attachShadowMap(Shader shader, GLenum unit, int unitValue, int lightIndex);
+	void attachShadowMap(Shader& shader, unsigned int unit, unsigned int unitValue, unsigned int lightIndex);
 
-	void attachLightTransforms(Shader shader);
+	void attachLightTransforms(Shader& shader);
+
+	void attachLightPosition(Shader& shader);
+
+	void attachFarPlane(Shader& shader);
+
+	std::vector<glm::mat4> calculateLightTransforms();
 
 	~PointLight();
 

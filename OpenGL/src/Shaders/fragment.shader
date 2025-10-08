@@ -20,7 +20,6 @@ uniform vec3 camPos;
 struct Material{
     float metallic;
     float smoothness;
-
 };
 
 struct Light{
@@ -95,8 +94,26 @@ float CalculateDirectionalShadowFactor(){
 
 }
 
+float CalcODSMForPointLight(PointLight pointLight,int smIndex){
+    
+    vec3 samplingDistance = fragWS -  pointLight.position;
 
-vec4 CalculatePhongLighting(Light base, vec3 direction, float shadowFactor){
+    float closestDepth = texture(oDShadowMap[smIndex].shadowMap,samplingDistance).r;
+
+    float samplingDLenght = length(samplingDistance);
+
+    float bias = 0.005f;
+
+    closestDepth *= oDShadowMap[smIndex].farPlane;
+
+    float shadowFactor = step(closestDepth,samplingDLenght - bias);
+
+    return shadowFactor;
+
+}
+
+
+vec4 CalculatePhongLighting(Light base, vec3 direction, float dShadowFactor, float pLShadowFactor){
 
     float lightFactor = max(dot(normalize(normalWS), normalize(direction)),0.0f);
 
@@ -120,16 +137,16 @@ vec4 CalculatePhongLighting(Light base, vec3 direction, float shadowFactor){
 
     }
 
-    return ambientLight + ( (1 - shadowFactor) * (mainLightWithColor  + specColor) );
+    return ambientLight + ( (1 - dShadowFactor) * (1 - pLShadowFactor) * (mainLightWithColor  + specColor) );
 
 }
 
 vec4 CalculateDirectionalLight(DirectionalLight light){
-    vec4 finalLighting = CalculatePhongLighting(light.base,light.direction,CalculateDirectionalShadowFactor());
+    vec4 finalLighting = CalculatePhongLighting(light.base,light.direction,CalculateDirectionalShadowFactor(),0);
     return finalLighting;
 }
 
-vec4 CalculatePointLight(PointLight pointLight,float shadowFactor){
+vec4 CalculatePointLight(PointLight pointLight, int pLightIndex){
     vec4 color = vec4(0,0,0,0);
 
     vec3 direction = fragWS - pointLight.position;
@@ -138,7 +155,7 @@ vec4 CalculatePointLight(PointLight pointLight,float shadowFactor){
 
     direction = normalize(direction);
 
-    color += CalculatePhongLighting(pointLight.base,direction,shadowFactor);
+    color += CalculatePhongLighting(pointLight.base,direction,0,CalcODSMForPointLight(pointLight,pLightIndex));
 
     float attenuation = pointLight.exponent * distance * distance + pointLight.linear * distance + pointLight.constant;
         
@@ -147,9 +164,9 @@ vec4 CalculatePointLight(PointLight pointLight,float shadowFactor){
     return color;
 }
 
-vec4 CalculateSpotLight(SpotLight spotLight){
+vec4 CalculateSpotLight(SpotLight spotLight, int sLightIndex){
     vec4 color = vec4(0,0,0,0);
-    color += CalculatePointLight(spotLight.pointLight,0);
+    color += CalculatePointLight(spotLight.pointLight,sLightIndex);
 
     vec3 fragDir = normalize(fragWS - spotLight.pointLight.position);  
 
@@ -170,7 +187,7 @@ vec4 CalculatePointLights(){
 
     for(int i = 0; i < pointLightCount; i++){
 
-        finalLighting += CalculatePointLight(pointLights[i],0);
+        finalLighting += CalculatePointLight(pointLights[i],i);
     }
 
     return finalLighting;
@@ -181,7 +198,7 @@ vec4 CalculateSpotLights(){
     vec4 finalLighting = vec4(0,0,0,0);
 
     for(int i = 0; i < spotLightCount; i++){
-        finalLighting += CalculateSpotLight(spotLights[i]);
+        finalLighting += CalculateSpotLight(spotLights[i],i + pointLightCount);
     }
 
     return finalLighting;
@@ -203,6 +220,6 @@ void main(){
 
     color = mainColor * overallLightCol;
 
-    //color = c;
+    //color = vec4(CalcODSMForPointLight(pointLights[0],0),0,0,1);
     //color = c;
 };

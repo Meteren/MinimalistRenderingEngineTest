@@ -119,7 +119,7 @@ void setNormals(float* verticeData, int stride, int indiceCount, int normalOffse
 
 }
 
-void RenderObjects(Shader* shader) {
+void renderObjects(Shader* shader) {
 
     glUniformMatrix4fv(shader->getModelLoc(), 1, GL_FALSE, glm::value_ptr(ApplyTransform(0, glm::vec3(0, 0, -2.5f), glm::vec3(1, 1, 1))));
 
@@ -149,11 +149,35 @@ void dShadowMapRenderPass(DirectionalLight* light) {
 
     light->attachDepthElement(shaders[1]);
 
-    RenderObjects(shaders[1]);
+    renderObjects(shaders[1]);
 
     glUseProgram(0);
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+}
+
+void oDShadowMapPass(PointLight* pointLight) {
+    
+    shaders[2]->useProgram();
+
+    glViewport(0, 0, pointLight->getShadowMapWidth(), pointLight->getShadowMapHeight());
+
+    pointLight->getShadowMap()->writeBuffer();
+
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    pointLight->attachLightTransforms(*shaders[2]);
+    
+    pointLight->attachLightPosition(*shaders[2]);
+
+    pointLight->attachFarPlane(*shaders[2]);
+
+    renderObjects(shaders[2]);
+
+    glUseProgram(0);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 }
 
@@ -168,7 +192,7 @@ void mainRenderPass(glm::mat4 projection, DirectionalLight* directionalLight,
     shaders[0]->useProgram();
 
     glViewport(0, 0, window->fbWidth, window->fbHeight);
-    glClearColor(0, 0, 0, 1);
+    glClearColor(0.2, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     textures[0]->useTexture(*shaders[0], GL_TEXTURE1);
@@ -184,6 +208,7 @@ void mainRenderPass(glm::mat4 projection, DirectionalLight* directionalLight,
  
     for (int i = 0; i < shaders[0]->pointLightCount; i++) {
         pointLights[i]->useLight(*shaders[0], i);
+        pointLights[i]->attachShadowMap(*shaders[0],3, 3 + i,i);
     }
 
     spotLights[1]->setCondition(window);
@@ -194,8 +219,10 @@ void mainRenderPass(glm::mat4 projection, DirectionalLight* directionalLight,
     spotLights[1]->setDirection(camera.getDir());
 
     //spot light loop
-    for (int i = 0; i < mainShader.spotLightCount; i++) {
-        spotLights[i]->useLight(mainShader, i);
+    for (int i = 0; i < shaders[0]->spotLightCount; i++) {
+        spotLights[i]->useLight(*shaders[0], i);
+        spotLights[i]->attachShadowMap(*shaders[0], 3 + 
+         shaders[0]->pointLightCount, 3 + shaders[0]->pointLightCount + i, i + shaders[0]->pointLightCount);
     }
     //----
     camera.TransformCamera(window->getKeys(), deltaTime);
@@ -209,7 +236,7 @@ void mainRenderPass(glm::mat4 projection, DirectionalLight* directionalLight,
 
     materials[0]->setMaterial(shaders[0]->getProgram(), "material.metallic", "material.smoothness");
 
-    RenderObjects(shaders[0]);
+    renderObjects(shaders[0]);
 
     glUseProgram(0);
 }
@@ -240,13 +267,14 @@ int main(void)
     SpotLight* spotLights[MAX_SPOT_LIGHT_COUNT];
 
     //point light creating
-    PointLight lightOne = PointLight(2.0f, 0.01f, glm::vec3(1, 0, 0), 0.01f, 0.03f, 1.0f, glm::vec3(-4.0f, -1.0f, 0.0f), 1024, 1024,100);
-    mainShader.pointLightCount++;
-    PointLight lightTwo = PointLight(2.0f, 0.01f, glm::vec3(0, 0, 1), 0.01f, 0.03f, 1.0f, glm::vec3(4.0f, -1.0f, 0.0f), 1024, 1024,100);
-    mainShader.pointLightCount++;
+    PointLight pointLightOne = PointLight(2.0f, 0.01f, glm::vec3(1, 0, 0), 0.01f, 0.03f, 1.0f, glm::vec3(-4.0f, -1.0f, 0.0f), 1024, 1024,100);
+    shaders[0]->pointLightCount++;
 
-    pointLights[0] = &lightOne;
-    pointLights[1] = &lightTwo;
+    PointLight pointLightTwo = PointLight(2.0f, 0.01f, glm::vec3(0, 0, 1), 0.01f, 0.03f, 1.0f, glm::vec3(4.0f, -1.0f, 0.0f), 1024, 1024,100);
+    shaders[0]->pointLightCount++;
+
+    pointLights[0] = &pointLightOne;
+    pointLights[1] = &pointLightTwo;
 
     //spot light creation
 
@@ -366,6 +394,14 @@ int main(void)
     while (!window->shouldWindowClosed())
     {
         dShadowMapRenderPass(&directionalLight);
+
+        for (int i = 0; i < shaders[0]->pointLightCount; i++) {
+            oDShadowMapPass(pointLights[i]);    
+        }
+
+        for (int i = 0; i < shaders[0]->spotLightCount; i++) {
+            oDShadowMapPass(spotLights[i]);
+        }
 
         mainRenderPass(projection, &directionalLight, pointLights, spotLights, camera, window);
 

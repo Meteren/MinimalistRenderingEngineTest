@@ -37,7 +37,6 @@ bool DirectionalShadowMap::init()
 
 	if (fbStatus != GL_FRAMEBUFFER_COMPLETE) {
 		printf("Error while generating FBO %i.\n", fbStatus);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		return false;
 	}
 

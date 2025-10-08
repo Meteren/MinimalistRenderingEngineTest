@@ -72,5 +72,5 @@ bool SpotLight::getSpotLightStatus() const
 
 SpotLight::~SpotLight()
 {
-	
+
 }
