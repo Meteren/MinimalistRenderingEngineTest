@@ -102,7 +102,7 @@ float CalcODSMForPointLight(PointLight pointLight,int smIndex){
 
     float samplingDLenght = length(samplingDistance);
 
-    float bias = 0.005f;
+    float bias = 0.25f;
 
     closestDepth *= oDShadowMap[smIndex].farPlane;
 

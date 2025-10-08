@@ -21,7 +21,7 @@ public:
 
 	void useLight(Shader shader, int i) override;
 
-	void attachShadowMap(Shader& shader, unsigned int unit, unsigned int unitValue, unsigned int lightIndex);
+	void attachShadowMap(Shader& shader, GLenum unit, unsigned int unitValue, unsigned int lightIndex);
 
 	void attachLightTransforms(Shader& shader);
 

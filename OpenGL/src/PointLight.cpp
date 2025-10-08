@@ -47,9 +47,9 @@ void PointLight::useLight(Shader shader, int i)
 
 }
 
-void PointLight::attachShadowMap(Shader& shader, unsigned int unit, unsigned int unitValue, unsigned int lightIndex)
+void PointLight::attachShadowMap(Shader& shader, GLenum unit, unsigned int unitValue, unsigned int lightIndex)
 {
-	shadowMap->readBuffer(GL_TEXTURE0 + unit + lightIndex);
+	shadowMap->readBuffer(unit);
 	glUniform1i(shader.u_oDShadowMap[lightIndex].u_oDShadowMap, unitValue);
 	glUniform1f(shader.u_oDShadowMap[lightIndex].u_farPlane, farPlane);
 

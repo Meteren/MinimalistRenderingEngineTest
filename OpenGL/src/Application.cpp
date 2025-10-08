@@ -60,10 +60,10 @@ static float ColorVal() {
     return value;
 }
 
-static glm::mat4x4 ApplyTransform(float rVal, glm::vec3 positionToMove, glm::vec3 scaleVector) {
+static glm::mat4x4 ApplyTransform(float rVal,glm::vec3 rotationAxis, glm::vec3 positionToMove, glm::vec3 scaleVector) {
     glm::mat4x4 model(1.0f);
     model = glm::translate(model, positionToMove);
-    model = glm::rotate(model, rVal * degreeToRad, glm::vec3(0, 0, 1));
+    model = glm::rotate(model, rVal * degreeToRad, rotationAxis);
     model = glm::scale(model, scaleVector);
     return model;
 }
@@ -121,19 +121,19 @@ void setNormals(float* verticeData, int stride, int indiceCount, int normalOffse
 
 void renderObjects(Shader* shader) {
 
-    glUniformMatrix4fv(shader->getModelLoc(), 1, GL_FALSE, glm::value_ptr(ApplyTransform(0, glm::vec3(0, 0, -2.5f), glm::vec3(1, 1, 1))));
+    glUniformMatrix4fv(shader->getModelLoc(), 1, GL_FALSE, glm::value_ptr(ApplyTransform(0,glm::vec3(0,1,0), glm::vec3(0, 2.5f, 0), glm::vec3(1, 1, 1))));
 
     meshes[0]->render();
 
-    glUniformMatrix4fv(shader->getModelLoc(), 1, GL_FALSE, glm::value_ptr(ApplyTransform(0, glm::vec3(0, -2.0f, 0.0f), glm::vec3(1, 1, 1))));
+    glUniformMatrix4fv(shader->getModelLoc(), 1, GL_FALSE, glm::value_ptr(ApplyTransform(0, glm::vec3(0, 1, 0), glm::vec3(0, -2.0f, 0.0f), glm::vec3(1, 1, 1))));
 
     meshes[1]->render();
 
-    glUniformMatrix4fv(shader->getModelLoc(), 1, GL_FALSE, glm::value_ptr(ApplyTransform(0, glm::vec3(-11, 3, 15), glm::vec3(0.009f, 0.009f, 0.009f))));
+    glUniformMatrix4fv(shader->getModelLoc(), 1, GL_FALSE, glm::value_ptr(ApplyTransform(0, glm::vec3(0, 1, 0), glm::vec3(-9, 3, 13), glm::vec3(0.009f, 0.009f, 0.009f))));
 
     models[1]->renderModel(*shader);
 
-    glUniformMatrix4fv(shader->getModelLoc(), 1, GL_FALSE, glm::value_ptr(ApplyTransform(0, glm::vec3(40, -2, 0), glm::vec3(1, 1, 1))));
+    glUniformMatrix4fv(shader->getModelLoc(), 1, GL_FALSE, glm::value_ptr(ApplyTransform(90.0f, glm::vec3(0, 1, 0), glm::vec3(0, -2, -40), glm::vec3(1, 1, 1))));
 
     models[0]->renderModel(*shader);
 }
@@ -208,7 +208,7 @@ void mainRenderPass(glm::mat4 projection, DirectionalLight* directionalLight,
  
     for (int i = 0; i < shaders[0]->pointLightCount; i++) {
         pointLights[i]->useLight(*shaders[0], i);
-        pointLights[i]->attachShadowMap(*shaders[0],3, 3 + i,i);
+        pointLights[i]->attachShadowMap(*shaders[0],GL_TEXTURE3 + i, 3 + i,i);
     }
 
     spotLights[1]->setCondition(window);
@@ -221,8 +221,8 @@ void mainRenderPass(glm::mat4 projection, DirectionalLight* directionalLight,
     //spot light loop
     for (int i = 0; i < shaders[0]->spotLightCount; i++) {
         spotLights[i]->useLight(*shaders[0], i);
-        spotLights[i]->attachShadowMap(*shaders[0], 3 + 
-         shaders[0]->pointLightCount, 3 + shaders[0]->pointLightCount + i, i + shaders[0]->pointLightCount);
+        spotLights[i]->attachShadowMap(*shaders[0], GL_TEXTURE3 + 
+         shaders[0]->pointLightCount + i, 3  + shaders[0]->pointLightCount + i, i + shaders[0]->pointLightCount);
     }
     //----
     camera.TransformCamera(window->getKeys(), deltaTime);
@@ -256,7 +256,7 @@ int main(void)
         std::cout << "Error occured!" << std::endl;
     }
 
-    DirectionalLight directionalLight = DirectionalLight(0.5f, 0.2f, glm::vec3(1, 1, 1), glm::vec3(-500, -500, 500), 8192, 8192);
+    DirectionalLight directionalLight = DirectionalLight(0.3f, 0.1f, glm::vec3(1, 1, 1), glm::vec3(-500, -500, 500), 8192, 8192);
 
     Material material = Material(1, 32);
 
@@ -267,10 +267,10 @@ int main(void)
     SpotLight* spotLights[MAX_SPOT_LIGHT_COUNT];
 
     //point light creating
-    PointLight pointLightOne = PointLight(2.0f, 0.01f, glm::vec3(1, 0, 0), 0.01f, 0.03f, 1.0f, glm::vec3(-4.0f, -1.0f, 0.0f), 1024, 1024,100);
+    PointLight pointLightOne = PointLight(2.0f, 0.1f, glm::vec3(1, 0, 0), 0.01f, 0.03f, 1.0f, glm::vec3(-10.0f, 4.0f, 0.0f), 1024, 1024,100.0f);
     shaders[0]->pointLightCount++;
 
-    PointLight pointLightTwo = PointLight(2.0f, 0.01f, glm::vec3(0, 0, 1), 0.01f, 0.03f, 1.0f, glm::vec3(4.0f, -1.0f, 0.0f), 1024, 1024,100);
+    PointLight pointLightTwo = PointLight(2.0f, 0.1f, glm::vec3(0, 0, 1), 0.01f, 0.03f, 1.0f, glm::vec3(4.0f, 8.0f, 0.0f), 1024, 1024,100.0f);
     shaders[0]->pointLightCount++;
 
     pointLights[0] = &pointLightOne;
@@ -279,15 +279,15 @@ int main(void)
     //spot light creation
 
     SpotLight spotLightOne =
-        SpotLight(2.0f, 0.01f, glm::vec3(1, 1, 1), 0.01f, 0.03f, 1.0f, glm::vec3(0, -1, 0), 60.0f, glm::vec3(0, -2, 0),1024,1024,100);
+        SpotLight(2.0f, 0.01f, glm::vec3(1, 1, 1), 0.01f, 0.03f, 1.0f, glm::vec3(0, 2, 0), 60.0f, glm::vec3(0, -2, 0),1024,1024,100.0f);
     shaders[0]->spotLightCount++;
 
     SpotLight spotLightTwo =
-        SpotLight(3.0f, 0.01f, glm::vec3(1, 0, 1), 0.01f, 0.03f, 1.0f, glm::vec3(5, -1, 0), 30.0f, glm::vec3(1, 0, 0), 1024, 1024, 100);
+        SpotLight(3.0f, 0.01f, glm::vec3(1, 0, 1), 0.01f, 0.03f, 1.0f, glm::vec3(5, -1, 0), 30.0f, glm::vec3(1, 0, 0), 1024, 1024, 100.0f);
     shaders[0]->spotLightCount++;
 
     SpotLight spotLightThree =
-        SpotLight(3.0f, 0.01f, glm::vec3(0, 1, 0), 0.01f, 0.03f, 1.0f, glm::vec3(0, 0, 9), 60.0f, glm::vec3(0, -1, -10), 1024, 1024, 100);
+        SpotLight(3.0f, 0.01f, glm::vec3(0, 1, 0), 0.01f, 0.03f, 1.0f, glm::vec3(0, 0, 9), 60.0f, glm::vec3(0, -1, -10), 1024, 1024, 100.0f);
     shaders[0]->spotLightCount++;
 
     spotLights[0] = &spotLightOne;
@@ -395,12 +395,11 @@ int main(void)
     {
         dShadowMapRenderPass(&directionalLight);
 
-        for (int i = 0; i < shaders[0]->pointLightCount; i++) {
-            oDShadowMapPass(pointLights[i]);    
-        }
-
-        for (int i = 0; i < shaders[0]->spotLightCount; i++) {
-            oDShadowMapPass(spotLights[i]);
+        for (int i = 0; i < shaders[0]->pointLightCount + shaders[0]->spotLightCount; i++) {
+            if (i < shaders[0]->pointLightCount)
+                oDShadowMapPass(pointLights[i]);
+            else
+                oDShadowMapPass(spotLights[i - shaders[0]->pointLightCount]);
         }
 
         mainRenderPass(projection, &directionalLight, pointLights, spotLights, camera, window);
