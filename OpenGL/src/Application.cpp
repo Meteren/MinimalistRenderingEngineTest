@@ -121,7 +121,7 @@ void setNormals(float* verticeData, int stride, int indiceCount, int normalOffse
 
 void renderObjects(Shader* shader) {
 
-    glUniformMatrix4fv(shader->getModelLoc(), 1, GL_FALSE, glm::value_ptr(ApplyTransform(0,glm::vec3(0,1,0), glm::vec3(0, 2.5f, 0), glm::vec3(1, 1, 1))));
+    glUniformMatrix4fv(shader->getModelLoc(), 1, GL_FALSE, glm::value_ptr(ApplyTransform(0,glm::vec3(0,1,0), glm::vec3(0, 0, -2.5f), glm::vec3(1, 1, 1))));
 
     meshes[0]->render();
 
@@ -129,7 +129,7 @@ void renderObjects(Shader* shader) {
 
     meshes[1]->render();
 
-    glUniformMatrix4fv(shader->getModelLoc(), 1, GL_FALSE, glm::value_ptr(ApplyTransform(0, glm::vec3(0, 1, 0), glm::vec3(-9, 3, 13), glm::vec3(0.009f, 0.009f, 0.009f))));
+    glUniformMatrix4fv(shader->getModelLoc(), 1, GL_FALSE, glm::value_ptr(ApplyTransform(0, glm::vec3(0, 1, 0), glm::vec3(-12.7f, 1.0f, 16), glm::vec3(0.009f, 0.009f, 0.009f))));
 
     models[1]->renderModel(*shader);
 
@@ -192,7 +192,7 @@ void mainRenderPass(glm::mat4 projection, DirectionalLight* directionalLight,
     shaders[0]->useProgram();
 
     glViewport(0, 0, window->fbWidth, window->fbHeight);
-    glClearColor(0.2, 0, 0, 1);
+    glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     textures[0]->useTexture(*shaders[0], GL_TEXTURE1);
@@ -256,7 +256,7 @@ int main(void)
         std::cout << "Error occured!" << std::endl;
     }
 
-    DirectionalLight directionalLight = DirectionalLight(0.3f, 0.1f, glm::vec3(1, 1, 1), glm::vec3(-500, -500, 500), 8192, 8192);
+    DirectionalLight directionalLight = DirectionalLight(0.0f, 0.1f, glm::vec3(1, 1, 1), glm::vec3(-500, -500, 500), 8192, 8192);
 
     Material material = Material(1, 32);
 
@@ -267,10 +267,10 @@ int main(void)
     SpotLight* spotLights[MAX_SPOT_LIGHT_COUNT];
 
     //point light creating
-    PointLight pointLightOne = PointLight(2.0f, 0.1f, glm::vec3(1, 0, 0), 0.01f, 0.03f, 1.0f, glm::vec3(-10.0f, 4.0f, 0.0f), 1024, 1024,100.0f);
+    PointLight pointLightOne = PointLight(2.0f, 0.01f, glm::vec3(1, 0, 0), 0.01f, 0.03f, 2.0f, glm::vec3(-6.0f, 3.0f, 0.0f), 1024, 1024,100.0f);
     shaders[0]->pointLightCount++;
 
-    PointLight pointLightTwo = PointLight(2.0f, 0.1f, glm::vec3(0, 0, 1), 0.01f, 0.03f, 1.0f, glm::vec3(4.0f, 8.0f, 0.0f), 1024, 1024,100.0f);
+    PointLight pointLightTwo = PointLight(2.0f, 0.01f, glm::vec3(0, 0, 1), 0.01f, 0.03f, 2.0f, glm::vec3(4.0f, 5.0f, 0.0f), 1024, 1024,100.0f);
     shaders[0]->pointLightCount++;
 
     pointLights[0] = &pointLightOne;
@@ -279,7 +279,7 @@ int main(void)
     //spot light creation
 
     SpotLight spotLightOne =
-        SpotLight(2.0f, 0.01f, glm::vec3(1, 1, 1), 0.01f, 0.03f, 1.0f, glm::vec3(0, 2, 0), 60.0f, glm::vec3(0, -2, 0),1024,1024,100.0f);
+        SpotLight(3.0f, 0.01f, glm::vec3(1, 1, 1), 0.01f, 0.03f, 1.0f, glm::vec3(0, 15, -20), 60.0f, glm::vec3(0, -2, 0),1024,1024,100.0f);
     shaders[0]->spotLightCount++;
 
     SpotLight spotLightTwo =
@@ -332,10 +332,10 @@ int main(void)
     };
 
     float verticesPlane[] = {
-        -10.0f,0.0f,-10.0f,   0.0f,10.0f,   0.0f,-1.0f,0.0f, //0
-        10.0f, 0.0f, -10.0f,  10.0f, 10.0f,  0.0f,-1.0f,0.0f, //1
-        -10.0f, 0.0f, 10.0f,  0.0f, 0.0f,    0.0f,-1.0f,0.0f, //2
-        10.0f, 0.0f, 10.0f,   10.0f, 0.0f,  0.0f,-1.0f,0.0f //3
+        -20.0f,0.0f,-10.0f,   0.0f,10.0f,   0.0f,-1.0f,0.0f, //0
+        20.0f, 0.0f, -10.0f,  10.0f, 10.0f,  0.0f,-1.0f,0.0f, //1
+        -20.0f, 0.0f, 10.0f,  0.0f, 0.0f,    0.0f,-1.0f,0.0f, //2
+        20.0f, 0.0f, 10.0f,   10.0f, 0.0f,  0.0f,-1.0f,0.0f //3
     };
 
     unsigned int indicesPlane[] = {

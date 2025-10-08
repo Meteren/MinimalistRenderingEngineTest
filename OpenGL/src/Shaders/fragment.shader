@@ -52,6 +52,15 @@ struct OmniDirectionalShadowMap{
     float farPlane;
 };
 
+vec3 sampleOffsetDirections[20] = vec3[]
+(
+   vec3( 1,  1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1,  1,  1), 
+   vec3( 1,  1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1,  1, -1),
+   vec3( 1,  1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1,  1,  0),
+   vec3( 1,  0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1,  0, -1),
+   vec3( 0,  1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0,  1, -1)
+);   
+
 uniform int pointLightCount;
 uniform int spotLightCount; //dont forget to send from cpu side as uniform value
 uniform Material material;
@@ -60,6 +69,7 @@ uniform PointLight pointLights[MAX_POINT_LIGHT_COUNT];
 uniform SpotLight spotLights[MAX_SPOT_LIGHT_COUNT];
 
 uniform OmniDirectionalShadowMap oDShadowMap[MAX_POINT_LIGHT_COUNT + MAX_SPOT_LIGHT_COUNT];
+
 
 float CalculateDirectionalShadowFactor(){
 
@@ -95,21 +105,26 @@ float CalculateDirectionalShadowFactor(){
 }
 
 float CalcODSMForPointLight(PointLight pointLight,int smIndex){
-    
-    vec3 samplingDistance = fragWS -  pointLight.position;
 
-    float closestDepth = texture(oDShadowMap[smIndex].shadowMap,samplingDistance).r;
+    float eyeDistance = length(fragWS - camPos);
+    float diskRadius = (1.0f + (eyeDistance / oDShadowMap[smIndex].farPlane)) / 25.0f;
+    int samples = 20;
+    vec3 samplingDirection = fragWS -  pointLight.position;
 
-    float samplingDLenght = length(samplingDistance);
+    float samplingDistance = length(samplingDirection);
 
-    float bias = 0.25f;
+    float shadowFactor = 0.0f;
 
-    closestDepth *= oDShadowMap[smIndex].farPlane;
+    float bias = 0.25;
 
-    float shadowFactor = step(closestDepth,samplingDLenght - bias);
+    for(int i = 0; i < samples; i++){
+        float closestDepth = texture(oDShadowMap[smIndex].shadowMap,samplingDirection + sampleOffsetDirections[i] * diskRadius).r;
+        closestDepth *= oDShadowMap[smIndex].farPlane;
+        shadowFactor += step(closestDepth,samplingDistance - bias);
+    }
+    shadowFactor /= float(samples);
 
     return shadowFactor;
-
 }
 
 

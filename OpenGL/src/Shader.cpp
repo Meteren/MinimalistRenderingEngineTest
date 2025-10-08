@@ -76,7 +76,7 @@ void Shader::createShaderProgram(const char* vShaderData, const char* fShaderDat
     if (!success) {
         glGetProgramInfoLog(program, 512, NULL, infoLog);
 
-        std::cout << "Error occured while linking program.\n" << std::endl;
+        printf("Error while linking: %s", infoLog);
         deleteProgram();
         return;
     }
@@ -228,7 +228,7 @@ void Shader::createShaderProgram(const char* vShaderData, const char* gShaderDat
     if (!success) {
         glGetProgramInfoLog(program, 512, NULL, infoLog);
 
-        std::cout << "Error occured while linking program.\n" << std::endl;
+        printf("Error while linking: %s", infoLog);
         deleteProgram();
         return;
     }
